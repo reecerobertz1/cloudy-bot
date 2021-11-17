@@ -1,0 +1,12 @@
+discord_py_slash_command==1.2.2
+instaloader==4.7.1
+pandas==1.2.4
+pytz==2021.1
+discord.py==1.7.2
+async_timeout==3.0.1
+Google_Images_Search==1.3.8
+seaborn==0.11.1
+giphy_client==1.0.0
+imgurpython==1.1.7
+discord==1.7.3
+matplotlib
