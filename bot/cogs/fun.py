@@ -257,7 +257,7 @@ class Fun(commands.Cog):
                 await ctx.reply("Sorry, I couldn't find a photo of that on imgur!")
     
     @commands.command()
-    async def gif(self, ctx, searchterm=None):
+    async def gif(self, ctx, *, searchterm=None):
 
         giphyApi=""
 
