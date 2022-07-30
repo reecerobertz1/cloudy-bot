@@ -1,101 +1,180 @@
 import discord
-import json
 from discord.ext import commands
+import json
 
+class HelpDropdown(discord.ui.Select):
 
-class helpcmd(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, commands: dict[commands.Cog, list[commands.Command]], bot):
+        options=[discord.SelectOption(label="Home", description="Home Page")]
+        super().__init__(
+            placeholder='Select a category...',
+            min_values=1,
+            max_values=1,
+            options=options
+        )
+        self.commands = commands
+        self.bot = bot
+        self.add_cog_options()
 
-    @commands.command()
-    async def help(self, ctx):
-            embed1 = discord.Embed(color=0x9E74FF)
-            emoji = '⏮'
-            emoji2 = '◀️'
-            emoji3 = '▶️'
-            emoji4 = '⏭'
-            try:
-                with open("prefixes.json", "r") as f:
-                    prefixes = json.load(f)
-                fix = prefixes[str(ctx.guild.id)]
-            except AttributeError: # I added this when I started getting dm error messages
-                fix = '+' # This will return "+" as a prefix. You can change it to any default prefix.
+    def add_cog_options(self):
+        for cog, commands in self.commands.items():
+            cog_name = getattr(cog, "qualified_name", "Other")
+            description = getattr(cog, "description", "Miscellaneous commands")
+            if not description or len(commands) == 0 or cog_name == "Jishaku" or cog_name == "Other":
+                continue
+            if cog_name.capitalize() == "Chroma":
+                description = "Includes the commands associated with Chroma group"
+            self.add_option(label=cog_name.capitalize(), description=description)
 
-            embed1.set_author(name='cloudy', icon_url='https://cdn.discordapp.com/attachments/799984745772875786/800015677653909504/yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png')
-            embed1.add_field(name="HELP", value="Help for cloudy is put into different categories so it's easier for you to find what you're looking for. In the following categories the command will be listed next to a number and what it does will be described below. These are the different catagories:", inline=False)
-            embed1.add_field(name='**1. Editing**', value="Includes the commands you would wanna use for editing!", inline=False)
-            embed1.add_field(name='**2. Chroma**', value='Includes the commands associated with [Chroma group](https://www.instagram.com/chromagrp) and its members!', inline=False) 
-            embed1.add_field(name="**3. Fun**", value='Includes commands you can use for fun!', inline=False)
-            embed1.add_field(name="**4. Custom commands**", value='Includes information on how to make custom commands with cloudy!', inline=False)
-            embed1.add_field(name="**5. Tags**", value="Includes information on how to use tags with cloudy!", inline=False)
-            embed1.add_field(name='**6. Other**', value='Includes other information on cloudy!')
-            embed1.set_footer(icon_url='https://cdn.discordapp.com/icons/694010548605550675/a_250164731b9ec08b3060309d3c20ee93.gif?size=256', text='to see the categories use the arrows below')
+    async def get_cog_help(self, cog):
+        commands = cog.get_commands()
+        embed = discord.Embed(title=f"{cog.qualified_name.capitalize()} Commands", color=0x9E74FF)
+        embed.set_footer(text="Category: " + cog.qualified_name.capitalize())
+        for command in commands:
+            embed.add_field(name=command.qualified_name, value=command.help, inline=False)
 
-            embed2 = discord.Embed(title='Commands for editing:', color=0x9E74FF, description=f"`{fix}effect`\nSends an After Effects effect\n\n`{fix}transition`\nSends a transition\n\n`{fix}audio [badass | soft]`\nSends an editing audio")
-            embed2.set_author(name='HELP', icon_url='https://cdn.discordapp.com/attachments/798221090555297792/798221191151222844/chroma_logo_blue.png')
-            embed2.set_footer(text='Category 1 | Editing')
+        return embed
 
-            embed3 = discord.Embed(title='Chroma commands:', color=0x9E74FF, description=f"`{fix}member`\nSends an instagram link to a random Chroma member\n\n`{fix}memberinfo <discord user>`\nSends info on a member of the discord server\n\n`{fix}edit`\nSends an edit made by a random Chroma member")
-            embed3.set_author(name='HELP', icon_url='https://cdn.discordapp.com/attachments/798221090555297792/798221191151222844/chroma_logo_blue.png')
-            embed3.set_footer(text='Category 2 | Chroma')
+    def get_prefix(self, channel):
+        try:
+            with open("prefixes.json", "r") as f:
+                prefixes = json.load(f)
+            fix = prefixes[str(channel.guild.id)]
+        except AttributeError:
+            fix = '+'
+        return fix
 
-            embed6 = discord.Embed(title='**About Cloudy:**', color=0x6bb5ff)
-            embed6.set_author(name='HELP', icon_url='https://cdn.discordapp.com/attachments/798221090555297792/798221191151222844/chroma_logo_blue.png')
-            embed6.add_field(name='**Basics:**', value=f"Cloudy's prefix for this server is {fix}, which means you have to put {fix} before you use a command, e.g. ``{fix}edits`` If you want to change the prefix type ``{fix}newprefix <new prefix>``", inline=False)
-            embed6.add_field(name='**About the coding of cloudy**:', value="Cloudy is coded using Python. The specific version it's developed on is Python 3.8. Some of the commands the bot has are from suggestions by members of Chroma. If you have any ideas for commands or any further questions or enconter problems while using Cloudy mention <@!728597655156162600> in the Chroma server or message them on Discord!", inline=False)
-            embed6.set_footer(text='Category 5 | made by alex<3#0017 with love')
+    async def get_init_page(self, channel, author):
+        prefix = self.get_prefix(channel)
+        embed = discord.Embed(title="Help", description=f"Cloudy, a multi-purpose bot made for Chroma.\nUse `{prefix}help [command|category|group]` for more info.", color=0x9E74FF)
+        embed.set_thumbnail(url=channel.guild.icon)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar)
+        for cog in self.bot.cogs:
+            commands = self.bot.cogs[cog].get_commands()
+            cog_name = getattr(self.bot.cogs[cog], "qualified_name", "Other")
+            cog_description = getattr(self.bot.cogs[cog], "description", "Miscellaneous commands")
+            if len(commands) == 0 or cog_name == "Other" or cog_name == "Jishaku" or cog_name == "Auto DM" or not cog_description:
+                continue
+            final_commands = []
+            for command in commands:
+                if command.hidden == False:
+                    final_commands.append(command)
+                if isinstance(command, discord.ext.commands.Group):
+                    for command in command.commands:
+                        final_commands.append(command)
+            embed.add_field(name=f"{cog_name.capitalize()} [{len(final_commands)}]", value=cog_description, inline=False)
 
-            embed4 = discord.Embed(title='Fun commands:', color=0x9E74FF, description=f"`{fix}imgur <search>`\nSends photo from imgur\n\n`{fix}gif [search]`\nSends a GIF from GIPHY\n\n`{fix}hug [mention]`\nGive a hug to a friend, or get a hug from Cloudy\n\n`{fix}kiss [mention]`\nKiss someone, or get a kiss from Cloudy\n\n`{fix}ship <person> <person2>`\nCloudy tells you whether it ships or not!\n\n`{fix}slap <mention>`\nSlap someone")
-            embed4.set_author(name='HELP', icon_url='https://cdn.discordapp.com/attachments/798221090555297792/798221191151222844/chroma_logo_blue.png')
-            embed4.set_footer(text='Category 3 | Fun')
+        return embed
 
-            embed5 = discord.Embed(title='Custom commands:', color=0x9E74FF, description=f"`{fix}newcmd`\nCreates a command\n\n`{fix}removecmd <commandname>`\nPermanently deletes a custom command\n\n`{fix}customcmds`\nSends a list of your guild's custom commands")
-            embed5.set_author(name='HELP', icon_url='https://cdn.discordapp.com/attachments/798221090555297792/798221191151222844/chroma_logo_blue.png')
-            embed5.set_footer(text='Category 4 | Custom commands')
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        cog_name = self.values[0].lower()
+        if cog_name.lower() not in self.bot.cogs:
+            channel = interaction.channel
+            author = interaction.user
+            embed = await self.get_init_page(channel, author)
+        else:
+            for name in self.bot.cogs:
+                if name.lower() == cog_name.lower():
+                    my_cog = self.bot.cogs[name]
+            embed = await self.get_cog_help(my_cog)
+        await interaction.edit_original_message(embed=embed)
 
-            embed45 = discord.Embed(title='Fun commands:', color=0x9E74FF, description=f"`{fix}dm <mention> <message>`\nSends the inputted message to the mentioned user's messages\n\n`{fix}dm_me <message>`\nSends you the inputted message\n\n`{fix}choose <choice1> <choice2>`\nChooses one of the two options\n\n`{fix}number`\nOutputs a random number within your range\n\n`{fix}embed <message>`\nEmbeds your message\n\n`{fix}clock <continent/city>`\nSends the current time in the specified city\n\n")
-            embed45.set_footer(text='Category 3.5 | Fun')
-            
-            embed7 = discord.Embed(title='Tag commands:', color=0x9E74FF, description=f"`{fix}tag <tag_name>`\nResponds with the tag's response\n\n`{fix}tag create <tag_name> <tag response>`\nMakes you a custom tag\n\n`{fix}tag info <tag_name>`\nGives you info on a tag\n\n`{fix}tag view`\nSends a list of all commands in the server\n\n`{fix}tag list [mention]`\nSends the tags owned by the given user\n\n`{fix}tag edit <tag_name> <response>`\nEdits the given tag to say your new input\n\n`{fix}tag delete <tag_name>`\nDeletes the given tag")
-            embed7.set_author(name='HELP', icon_url='https://cdn.discordapp.com/attachments/798221090555297792/798221191151222844/chroma_logo_blue.png')
+class testView(discord.ui.Select):
 
-            pages = [embed1, embed2, embed3, embed4, embed45, embed5, embed7, embed6]
+    def __init__(self, commands: dict[commands.Cog, list[commands.Command]]):
+        options=[discord.SelectOption(label="Home", description="Home Page")]
+        super().__init__(
+            placeholder='Select a category...',
+            min_values=1,
+            max_values=1,
+            options=options
+        )
+        self.commands = commands
+        self.add_my_options()
 
-            message = await ctx.send(embed=embed1)
-            await message.add_reaction(emoji)
-            await message.add_reaction(emoji2)
-            await message.add_reaction(emoji3)
-            await message.add_reaction(emoji4)
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await interaction.edit_original_message(content="hey")
 
-            def check(reaction, user):
-                return user == ctx.author
+class myView(discord.ui.View):
+    def __init__(self, mapping, bot):
+        super().__init__()
+        # Adds the dropdown to our view object.
+        self.add_item(HelpDropdown(mapping, bot))
 
-            i = 0
-            reaction = None
+class HelpCommand(commands.MinimalHelpCommand):
+    
+    def get_command_signature(self, command):
+        channel = self.get_destination()
+        try:
+            with open("prefixes.json", "r") as f:
+                prefixes = json.load(f)
+            fix = prefixes[str(channel.guild.id)]
+        except AttributeError:
+            fix = '+'
+        return '%s%s %s' % (fix, command.qualified_name, command.signature)
 
-            while True:
-                if str(reaction) == '⏮':
-                    i = 0
-                    await message.edit(embed = pages[i])
-                elif str(reaction) == '◀️':
-                    if i > 0:
-                        i -= 1
-                        await message.edit(embed = pages[i])
-                elif str(reaction) == '▶️':
-                    if i < 7:
-                        i += 1
-                        await message.edit(embed = pages[i])
-                elif str(reaction) == '⏭':
-                    i = 7
-                    await message.edit(embed = pages[i])
-            
-                try:
-                    reaction, user = await self.client.wait_for('reaction_add', timeout = 60.0, check = check)
-                    await message.remove_reaction(reaction, user)
-                except:
-                    break
+    def get_prefix(self):
+        channel = self.get_destination()
+        try:
+            with open("prefixes.json", "r") as f:
+                prefixes = json.load(f)
+            fix = prefixes[str(channel.guild.id)]
+        except AttributeError:
+            fix = '+'
+        return fix
 
-            await message.clear_reactions()
+    async def send_bot_help(self, mapping):
+        prefix = self.get_prefix()
+        channel = self.get_destination()
+        author = self.context.author
+        embed = discord.Embed(title="Help", description=f"Use `{prefix}help [command]` for more info on a command. You can also use `{prefix}help [category]` for more info on a category.\n\nThese are the different categories:", color=0x9E74FF)
+        embed.set_thumbnail(url=channel.guild.icon)
+        embed.set_footer(text=f"Requested by {author}", icon_url=author.avatar)
+        for cog, commands in mapping.items():
+            cog_name = getattr(cog, "qualified_name", "Other")
+            cog_description = getattr(cog, "description", "Miscellaneous commands")
+            if len(commands) == 0 or cog_name == "Auto DM" or cog_name == "Jishaku" or cog_name == "HelpCog" or cog_name == "Other" or not cog_description:
+                continue
+            final_commands = []
+            for command in commands:
+                if command.hidden == False:
+                    final_commands.append(command)
+                if isinstance(command, discord.ext.commands.Group):
+                    for command in command.commands:
+                        final_commands.append(command)
+            embed.add_field(name=f"{cog_name.capitalize()} [{len(final_commands)}]", value=cog_description, inline=False)
 
-def setup(client):
-    client.add_cog(helpcmd(client))
+        await channel.send(embed=embed, view=myView(mapping, self.context.bot))
+
+    async def send_command_help(self, command):
+        embed = discord.Embed(title=self.get_command_signature(command), color=0x9E74FF)
+        embed.add_field(name="Help", value=command.help)
+        alias = command.aliases
+        if alias:
+            embed.add_field(name="Aliases", value=", ".join(alias), inline=False)
+
+        channel = self.get_destination()
+        await channel.send(embed=embed)
+
+    async def send_cog_help(self, cog):
+        commands = cog.get_commands()
+        embed = discord.Embed(title=f"{cog.qualified_name.capitalize()} Commands", color=0x9E74FF)
+        for command in commands:
+            embed.add_field(name=command.qualified_name, value=command.help)
+
+        channel = self.get_destination()
+        await channel.send(embed=embed)
+
+class HelpCog(commands.Cog):
+    def __init__(self, bot):
+        self._original_help_command = bot.help_command
+        bot.help_command = HelpCommand()
+        bot.help_command.cog = self
+        
+    def cog_unload(self):
+        self.bot.help_command = self._original_help_command
+
+async def setup(client: commands.Bot) -> None:
+    await client.add_cog(HelpCog(client))
