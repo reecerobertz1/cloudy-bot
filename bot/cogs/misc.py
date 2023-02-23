@@ -166,7 +166,7 @@ class Misc(commands.Cog, name="Misc"):
         embed.add_field(name="<a:badges:938023584142622791> Badges", value=f"{badges}", inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['a'])
+    @commands.command(aliases=['act'])
     async def activity(self, ctx, member: Optional[discord.Member]):
         if not member:
             member = ctx.author
