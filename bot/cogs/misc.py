@@ -157,9 +157,9 @@ class Misc(commands.Cog, name="Misc"):
         data = await self.get_user_data(member.id)
         try:
             if data['last_seen'] == None:
-                await embed.add_field(name="Activity", value=f'Been active for **{humanize.precisedelta(discord.utils.utcnow() - data["online_since"], minimum_unit="seconds", format="%0.0f")}**')
+                await embed.add_field(name="<:status_online:998595341450481714> Activity", value=f'Active for **{humanize.precisedelta(discord.utils.utcnow() - data["online_since"], minimum_unit="seconds", format="%0.0f")}**')
             else:
-                await embed.add_field(name="Activity", value=f'Went offline {discord.utils.format_dt(data["last_seen"], "R")}')
+                await embed.add_field(name="<:status_offline:998595266062061653> Activity", value=f'Went offline {discord.utils.format_dt(data["last_seen"], "R")}')
         except Exception as error:
             if str(error) == "'NoneType' object is not subscriptable":
                 return
