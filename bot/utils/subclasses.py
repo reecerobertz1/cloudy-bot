@@ -5,6 +5,7 @@ import aiohttp
 import aiosqlite
 import json
 from datetime import datetime
+import asyncpg
 
 from setup.lists import *
 from setup.config import *
@@ -67,11 +68,16 @@ class CloudyBot(commands.Bot):
         self.launch_time = datetime.utcnow()
         self.embed_color = 0x2B2D31
 
+        credentials = {"user": postgres_user, "password": postgres_password, "database": postgres_db, "host": postgres_host}
+        pgdb = await asyncpg.create_pool(**credentials)
+        await pgdb.execute("CREATE TABLE IF NOT EXISTS user_info (user_id bigint PRIMARY KEY , last_seen timestamp with time zone, online_since timestamp with time zone)")
+
         dbase = await aiosqlite.connect("utils/recruit.db")
         async with dbase.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS applications (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, accepted INTEGER, msg_id INTEGER)") 
 
         self.db = dbase
+        self.pgdb = pgdb
 
     async def close(self):
         await super().close()
