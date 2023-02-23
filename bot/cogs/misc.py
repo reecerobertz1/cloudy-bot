@@ -47,7 +47,7 @@ class Misc(commands.Cog, name="Misc"):
 
     async def get_user_data(self, userid):
         query = "SELECT * FROM user_info WHERE user_id = $1;"
-        info = await self.bot.db.fetchrow(query, userid)
+        info = await self.bot.pgdb.fetchrow(query, userid)
         return info
 
     @commands.command()
