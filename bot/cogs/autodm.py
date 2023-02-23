@@ -6,18 +6,37 @@ import json
 import os
 import random
 from google_images_search import GoogleImagesSearch
-import google_images_search
-from lists import oldmems
-from setup.config import *
+from setup.lists import oldmems
 
-# accessing from setup.config
-gis = GoogleImagesSearch(giskey, giskey2)
+gis = GoogleImagesSearch('AIzaSyCz_XDNso_LhVLrVw4CpEx088oqXwl3XbE', '1d89ab696c7fd6ac1')
 
 class autodm(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    """    @commands.command()
+    @commands.has_role('staff')
+    async def accept(self, ctx, *, member: discord.Member):
+        message = ctx.message
+        embed = discord.Embed(title="Congrats, you got into Chroma!", description="**Read the rules before joining the Chroma discord!**", color=0x303136)
+        embed.add_field(name="\u200b", value="thank you for joining chroma!!\nwe are honored to have you in our grp\n\n**GRP RULES:**\n- WATERMARK your logos with your USERNAME (make it unstealable)\n- NEVER share our logos and mega link for our logos to anyone\n- always use #헰헵헿헼헺헮헴헿헽\n- make sure you’re following @aelestic @electric.aep_ @manglxd @rqinflow @starrys.aep and @chromagrp at all times\n\n**CHAT RULES:**\n- try to stay active\n- set your discord nickname to “name | username” format\n- no impersonation\n- only spam in the spam channels\n- only self promote in the self-promo channel\n- no nudity/inappropriate content allowed\n- no offensive jokes\n- no negative comments about others\n- no inappropriate songs/videos in music bots\n- if you ever decide to leave/quit, pls dm @chromagrp\n- do not share the discord invite link with others\n\nif you have any problems with the link you have access to a channel called #members-help in the scout server where you can let us know!")
+        embed.set_thumbnail(url="https://scontent-ort2-1.cdninstagram.com/v/t51.2885-19/83646915_193095065216493_3896196118190489600_n.jpg?_nc_ht=scontent-ort2-1.cdninstagram.com&_nc_ohc=GOALPaSRkDQAX97VJL3&edm=AKralEIAAAAA&ccb=7-4&oh=8a2292d20ac8c4908322e4e4598b5aa9&oe=609D5D70&_nc_sid=5e3072")
+        await member.send(embed=embed)
+        channl = self.client.get_channel(694010549532360726)
+        channel = channl
+        chanl = self.client.get_channel(835837557036023819)
+        msgchannel = chanl
+        roleid = 835838435067297823
+        role = ctx.guild.get_role(roleid)
+        membr = member.display_name
+        link = await channel.create_invite(max_age = 86400, max_uses = 1)
+        embed2 = discord.Embed(description=f"**you accepted {membr} // {member}!**", color=0x303136)
+        await member.send(f"**Here's the link! <3**\n{link}")
+        await member.add_roles(role)
+        await message.add_reaction('✅')
+        await msgchannel.send(embed=embed2)"""
+
+    """@commands.command()
     @commands.has_role('staff')
     async def accept(self, ctx, *, member: discord.Member):
         sendch = self.client.get_channel(836677673681944627)
@@ -48,7 +67,7 @@ class autodm(commands.Cog):
             data.append(name)
         with open("members.json", "w") as file:
             json.dump(data, file)
-        await sendch.send(f"**you need to follow:**\nhttps://instagram.com/{name}")
+        await sendch.send(f"**you need to follow:**\nhttps://instagram.com/{name}")"""
         
     @commands.command()
     async def answer(self, ctx, *, response):
@@ -66,7 +85,7 @@ class autodm(commands.Cog):
         await channel.send(f"{user.mention}")
         await channel.send(embed=embed)
 
-    @commands.command()
+    """@commands.command()
     @commands.has_role('staff')
     async def totalmembers(self, ctx):
         with open("members.json", "r") as file:
@@ -82,7 +101,7 @@ class autodm(commands.Cog):
         embed = discord.Embed(title="Congrats, you got into Chroma!", description="**Read the rules before joining the Chroma discord!**", color=0x36393f)
         embed.add_field(name="\u200b", value="thank you for joining chroma!!\nwe are honored to have you in our grp\n\nGRP RULES:\n- WATERMARK your logos with your USERNAME (make it unstealable)\n- NEVER share our logos and mega link for our logos to anyone\n- always use #헰헵헿헼헺헮헴헿헽\n- make sure you’re following @aelestic @electric.aep_ @manglxd @rqinflow and @starrys.aep at all times\n\nCHAT RULES:\n- try to stay active\n- set your discord nickname to “name | username” format\n- no impersonation\n- only spam in the spam channels\n- only self promote in the self-promo channel\n- no nudity/inappropriate content allowed\n- no offensive jokes\n- no negative comments about others\n- no inappropriate songs/videos in music bots\n- if you ever decide to leave/quit, pls dm @chromagrp\n- do not share the discord invite link with others\n\nif you have any problems with the link you have access to a channel called #members-help in the scout server where you can let us know!")
         embed.set_thumbnail(url="https://scontent-ort2-1.cdninstagram.com/v/t51.2885-19/83646915_193095065216493_3896196118190489600_n.jpg?_nc_ht=scontent-ort2-1.cdninstagram.com&_nc_ohc=GOALPaSRkDQAX97VJL3&edm=AKralEIAAAAA&ccb=7-4&oh=8a2292d20ac8c4908322e4e4598b5aa9&oe=609D5D70&_nc_sid=5e3072")
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed)"""
 
     @commands.command()
     async def photo(self, ctx, *, args):
@@ -125,15 +144,12 @@ class autodm(commands.Cog):
     @commands.command()
     async def qna(self, ctx, *, question):
         guild_id = 835495688832811039
-        channel = self.client.get_channel(id=862615059355271188)         
-        if ctx.guild.id == guild_id:
-                q = await ctx.reply("asked!")
-                await channel.send(f"{question} ^ {ctx.author.id}")
-                await asyncio.sleep(2)
-                await ctx.message.delete()
-                await q.delete()
-        else:
-              return
+        channel = self.client.get_channel(862615059355271188)         
+        q = await ctx.reply("asked!")
+        await channel.send(f"{question} ^ {ctx.author.id}")
+        await asyncio.sleep(2)
+        await ctx.message.delete()
+        await q.delete()
               
               
     @commands.command()
@@ -192,5 +208,5 @@ class autodm(commands.Cog):
             await message.add_reaction('❌')
 
 
-def setup(client):
-    client.add_cog(autodm(client))
+async def setup(client):
+    await client.add_cog(autodm(client))
