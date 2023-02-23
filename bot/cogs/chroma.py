@@ -20,8 +20,8 @@ secondaryApp = firebase_admin.initialize_app(cred2, {
 }, name="secondary")
 
 class Chroma(commands.Cog, name="Chroma", description="Includes the commands associated with [Chroma group](https://www.instagram.com/chromagrp) and its members!"):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(aliases=["edit"])
     async def edits(self, ctx):
@@ -161,7 +161,7 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
             await message.add_reaction("✅")
             def check(reaction, user):
                 return user == ctx.author and str(reaction.emoji) in ["✅"] and reaction.message == message
-            confirmation = await self.client.wait_for("reaction_add", check=check) 
+            confirmation = await self.bot.wait_for("reaction_add", check=check) 
             if confirmation:
                 await message.delete()
                 await ctx.send(f"https://cloudy.rqinflow.com/{acc}")
@@ -202,5 +202,5 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
         else:
             return
 
-async def setup(client):
-    await client.add_cog(Chroma(client))
+async def setup(bot):
+    await bot.add_cog(Chroma(bot))

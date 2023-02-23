@@ -13,8 +13,8 @@ import json
 from setup.lists import palettes
 
 class Editingstuff(commands.Cog, name="Editing", description="Includes the commands you would wanna use for editing!"):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     def reg_palette(self):
         ranpal = random.choice(palettes)
@@ -178,7 +178,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
                 "mako",
                 "light:seagreen"]) """
         color_func = functools.partial(self.reg_palette)
-        buffer = await self.client.loop.run_in_executor(None, color_func)
+        buffer = await self.bot.loop.run_in_executor(None, color_func)
         await ctx.send(file=discord.File(fp=buffer, filename="colorpalette.png"))
 
     @commands.command(aliases=["makepalette", "generatepalette", "gp", "mp"])
@@ -215,13 +215,13 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
                     image = BytesIO(await to_edit.read())
                     image.seek(0)
             palette_gen = functools.partial(self.get_palette, image)
-            palette = await self.client.loop.run_in_executor(None, palette_gen)
+            palette = await self.bot.loop.run_in_executor(None, palette_gen)
             await ctx.send(file=discord.File(fp=palette, filename="palette.png"))
 
     @commands.command()
     async def member(self, ctx):
         members = []
-        guild = self.client.get_guild(694010548605550675)
+        guild = self.bot.get_guild(694010548605550675)
         mems = guild.members
         for member in mems:
             if member.bot:
@@ -235,5 +235,5 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
             embed.add_field(name="Click on the username to go to their Instagram", value=f"[{mem}](https://instagram.com/{mem})")
         await ctx.send(embed=embed)
 
-async def setup(client):
-    await client.add_cog(Editingstuff(client))
+async def setup(bot):
+    await bot.add_cog(Editingstuff(bot))

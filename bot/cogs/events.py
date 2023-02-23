@@ -3,19 +3,14 @@ from discord.ext import commands
 import json
 from typing import Optional
 
-class chromacom(commands.Cog):
-    def __init__(self,client):
-        self.client = client
-
-    async def get_user_data(self, userid):
-        query = "SELECT * FROM user_info WHERE user_id = $1;"
-        info = await self.bot.db.fetchrow(query, userid)
-        return info
+class events(commands.Cog):
+    def __init__(self,bot):
+        self.bot = bot
 
     @commands.Cog.listener()
     async def on_message(self, message):
         try:
-            if message.mentions[0] == self.client.user:
+            if message.mentions[0] == self.bot.user:
 
                 if 'help' in message.content:
 
@@ -97,16 +92,16 @@ class chromacom(commands.Cog):
         if member.guild.id == stored_guild_id:
             embed = discord.Embed(title='Welcome to Chroma!', color=0xff3dc8, description=f"{member.mention} has joined the sever!\n• read the <#725373131220320347> and get your <#838298608704815114>\n• introduce yourself in <#727875317439528982>\n• questions? ask a <@&753678720119603341> or <@&739513680860938290>!\n• enjoy your time here in chroma! <3")
             embed.set_footer(text='thank you for joining!', icon_url=member.display_avatar.url)
-            channel = self.client.get_channel(725389930607673384)
+            channel = self.bot.get_channel(725389930607673384)
             embed.set_thumbnail(url='https://rqinflow.com/static/chroma_pfp.png')
             await channel.send(f'{member.mention}')
             await channel.send(embed=embed)
         elif member.guild.id == scout_guild_id:
-            guild = self.client.get_guild(694010548605550675)
-            guild2 = self.client.get_guild(835495688832811039)
+            guild = self.bot.get_guild(694010548605550675)
+            guild2 = self.bot.get_guild(835495688832811039)
             embed2 = discord.Embed(title="welcome!", color=0x303136, description=f"{member.mention} has joined the server!\n\n• read the <#835495896727814164>!\n• get editing help in <#862656708059594782>\n• talk to other editors <#836647673595428925>")
             embed2.set_footer(text='thanks for wanting to join chroma! <3', icon_url=member.display_avatar.url)
-            channel2 = self.client.get_channel(836251337649160256)
+            channel2 = self.bot.get_channel(836251337649160256)
             await channel2.send(f'{member.mention}')
             await channel2.send(embed=embed2)
             member2 = guild.get_member(member.id)
@@ -122,7 +117,7 @@ class chromacom(commands.Cog):
             embed = discord.Embed(title="Member left!", color=0x96bfff, description=f"{member.mention} has left the discord.")
             embed.set_thumbnail(icon_url=member.display_avatar.url)
             embed.set_footer(text='i hope to see you again!', icon_url='https://cdn.discordapp.com/attachments/799984745772875786/800015677653909504/yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png')
-            channel = self.client.get_channel(725389930607673384)
+            channel = self.bot.get_channel(725389930607673384)
             await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -174,5 +169,5 @@ class chromacom(commands.Cog):
                         print(e)
         await self.bot.pgdb.release(connection)
 
-async def setup(client):
-    await client.add_cog(chromacom(client))
+async def setup(bot):
+    await bot.add_cog(events(bot))

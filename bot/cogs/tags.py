@@ -7,8 +7,8 @@ from firebase_admin import credentials
 import datetime
 
 class tag(commands.Cog, name="Tags", description="Includes information on how to use tags with cloudy!"):
-    def __init__(self,client):
-        self.client = client
+    def __init__(self,bot):
+        self.bot = bot
 
         #with open('badwords.txt', 'r') as f:
         #    global badwords 
@@ -181,5 +181,5 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
         elif author != owner:
             return await ctx.reply(f"you cannot edit **{tag_name}**, because you don't own it!")
 
-async def setup(client):
-    await client.add_cog(tag(client))
+async def setup(bot):
+    await bot.add_cog(tag(bot))

@@ -3,8 +3,8 @@ from discord.ext import commands
 import json
 
 class Administration(commands.Cog, name="Admin", description="Administrative commands for Chroma staff"):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         
     @commands.command(aliases=["invite"]) 
     @commands.has_permissions(manage_guild=True)
@@ -31,24 +31,24 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
         await ctx.message.delete()
         first = await ctx.send("What title do you want your embed to have?")
 
-        title1 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+        title1 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
         title = title1.content
         await title1.delete()
         await first.delete()
         second = await ctx.send('Okay! What do you want your description to be?')
 
-        desc1 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+        desc1 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
         desc = desc1.content
         await desc1.delete()
         await second.delete()
 
         col = await ctx.send('What color do you want your embed to be? (in hex; eg., 2B2D31)')
-        color = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+        color = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
         await col.delete()
         await color.delete()
 
         third = await ctx.send('Are you finished with your embed? Say ``yes`` if you are and ``no`` if you arent!')
-        answer1 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+        answer1 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
         if 'yes' in answer1.content:
             await answer1.delete()
             await third.delete()
@@ -57,13 +57,13 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
         else:
             four = await ctx.send('OK! What do you want the name of the first field to be!')
 
-            name0 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+            name0 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
             name1 = name0.content
             await name0.delete()
             await four.delete()
             five = await ctx.send('Cool! What do you want your value to be?')
 
-            value0 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+            value0 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
             value1 = value0.content
             await value0.delete()
             await five.delete()
@@ -86,5 +86,5 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
         embed = discord.Embed(description=f"✅ The prefix was changed to {prefix}", colour=0x70ff75)
         await ctx.send(embed=embed)
 
-async def setup(client: commands.Bot) -> None:
-    await client.add_cog(Administration(client))
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Administration(bot))

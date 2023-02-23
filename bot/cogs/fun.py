@@ -26,8 +26,8 @@ from typing import Optional
 imgur = ImgurClient(imgur_id, imgur_secret)
 
 class Fun(commands.Cog, name="Fun", description="Includes commands you can use for fun!"):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     def defined_color(self, color_count: int):
         ranpal = random.choice(palettes)
@@ -96,11 +96,11 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
             if not spotify:
                 return await ctx.send("This user is not listening to Spotify")
             url = spotify.album_cover_url
-            response = await self.client.session.get(url)
+            response = await self.bot.session.get(url)
             album = BytesIO(await response.read())
             album.seek(0)
             spotify_card = functools.partial(self.spotify_card, member, album)
-            card = await self.client.loop.run_in_executor(None, spotify_card)
+            card = await self.bot.loop.run_in_executor(None, spotify_card)
             await ctx.send(file=discord.File(fp=card, filename="spotify.png"))
 
     @commands.command()
@@ -128,7 +128,7 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     async def kiss(self, ctx, member: typing.Optional[discord.Member]):
         """Kiss the homies good night or get a kiss from Cloudy"""
         author = ctx.message.author.mention
-        kiss = self.client.get_emoji(804022318992719922)
+        kiss = self.bot.get_emoji(804022318992719922)
         if member == None:
             await ctx.reply(f"Cloudy kissed {author}! {kiss}")
         else:
@@ -185,17 +185,17 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
         def check(m):
             return m.content == "hello"
 
-        msg = await self.client.wait_for("message", check=check)
+        msg = await self.bot.wait_for("message", check=check)
         await ctx.reply(f"Hello {msg.author}!")
 
     @commands.command()
     async def number(self, ctx):
         """Sends you a random number within your given range"""
         await ctx.reply('What do you want your lowest possible number to be?')
-        number1 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+        number1 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
         number1 = int(number1.content)
         await ctx.reply('OK, noted! What do you want the highest number to be?')
-        number2 = await self.client.wait_for('message', check=lambda message: message.author == ctx.author)
+        number2 = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
         number2 = int(number2.content)
         await ctx.reply(random.randrange(number1, number2))
 
@@ -307,7 +307,7 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     async def color(self, ctx, color_count: int):
         """Sends a color palette with the specified amount of colors"""
         color_func = functools.partial(self.defined_color, color_count)
-        buffer = await self.client.loop.run_in_executor(None, color_func)
+        buffer = await self.bot.loop.run_in_executor(None, color_func)
         await ctx.send(file=discord.File(fp=buffer, filename="palette.png"))
 
     @commands.command(help="Sends a cat photo")
@@ -318,5 +318,5 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
                 elements = json[0]
                 await ctx.send(elements["url"])
 
-async def setup(client):
-    await client.add_cog(Fun(client))
+async def setup(bot):
+    await bot.add_cog(Fun(bot))

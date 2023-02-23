@@ -45,6 +45,11 @@ class Misc(commands.Cog, name="Misc"):
         if member.premium_since is not None:
             badgeslist.append("<a:boost:938021210984419338> Booster")
 
+    async def get_user_data(self, userid):
+        query = "SELECT * FROM user_info WHERE user_id = $1;"
+        info = await self.bot.db.fetchrow(query, userid)
+        return info
+
     @commands.command()
     @can_close()
     async def solved(self, ctx):
