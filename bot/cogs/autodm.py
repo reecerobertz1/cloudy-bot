@@ -8,8 +8,6 @@ import random
 from google_images_search import GoogleImagesSearch
 from setup.lists import oldmems
 
-gis = GoogleImagesSearch('AIzaSyCz_XDNso_LhVLrVw4CpEx088oqXwl3XbE', '1d89ab696c7fd6ac1')
-
 class autodm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -102,32 +100,6 @@ class autodm(commands.Cog):
         embed.add_field(name="\u200b", value="thank you for joining chroma!!\nwe are honored to have you in our grp\n\nGRP RULES:\n- WATERMARK your logos with your USERNAME (make it unstealable)\n- NEVER share our logos and mega link for our logos to anyone\n- always use #헰헵헿헼헺헮헴헿헽\n- make sure you’re following @aelestic @electric.aep_ @manglxd @rqinflow and @starrys.aep at all times\n\nCHAT RULES:\n- try to stay active\n- set your discord nickname to “name | username” format\n- no impersonation\n- only spam in the spam channels\n- only self promote in the self-promo channel\n- no nudity/inappropriate content allowed\n- no offensive jokes\n- no negative comments about others\n- no inappropriate songs/videos in music bots\n- if you ever decide to leave/quit, pls dm @chromagrp\n- do not share the discord invite link with others\n\nif you have any problems with the link you have access to a channel called #members-help in the scout server where you can let us know!")
         embed.set_thumbnail(url="https://scontent-ort2-1.cdninstagram.com/v/t51.2885-19/83646915_193095065216493_3896196118190489600_n.jpg?_nc_ht=scontent-ort2-1.cdninstagram.com&_nc_ohc=GOALPaSRkDQAX97VJL3&edm=AKralEIAAAAA&ccb=7-4&oh=8a2292d20ac8c4908322e4e4598b5aa9&oe=609D5D70&_nc_sid=5e3072")
         await ctx.send(embed=embed)"""
-
-    @commands.command()
-    async def photo(self, ctx, *, args):
-        if not os.path.exists(f'./assets/{args}'):
-            gr = await ctx.send("<a:loading:831933223834484746> searching the web")
-            sav = os.mkdir(f'./assets/{args}')
-            fol = sav
-            async with ctx.typing():
-                _search_params = {
-                    'q': f'{args}',
-                    'num': 25,
-                    'fileType': 'png'
-                }
-                gis.search(search_params=_search_params, path_to_dir=f'./assets/{args}/')
-                image = os.listdir(f'./assets/{args}/')
-                imgString = random.choice(image)  # Selects a random element from the list
-                path = f'./assets/{args}/' + imgString
-                await gr.delete()
-                await ctx.send(file=discord.File(path))
-            return
-        else:
-            image = os.listdir(f'./assets/{args}/')
-            imgString = random.choice(image)  # Selects a random element from the list
-            path = f'./assets/{args}/' + imgString
-            await ctx.send(file=discord.File(path))
-            return
 
     @commands.command(aliases=['ia'])
     async def inactive(self, ctx, *, value):
