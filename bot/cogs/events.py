@@ -1,10 +1,16 @@
 import discord
 from discord.ext import commands
 import json
+from typing import Optional
 
 class chromacom(commands.Cog):
     def __init__(self,client):
         self.client = client
+
+    async def get_user_data(self, userid):
+        query = "SELECT * FROM user_info WHERE user_id = $1;"
+        info = await self.bot.db.fetchrow(query, userid)
+        return info
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -140,6 +146,33 @@ class chromacom(commands.Cog):
 
         with open("./prefixes.json", "w") as f:
             json.dump(prefixes,f, indent=4)
+
+    @commands.Cog.listener()
+    async def on_presence_update(self, before, after):
+        connection = await self.bot.pgdb.acquire()
+        if "offline" in after.status:
+            async with connection.transaction():
+                try:
+                    user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
+                    await self.bot.pgdb.execute(user_info_query, after.id, discord.utils.utcnow(), None)
+                except Exception as e:
+                    if e.message == 'duplicate key value violates unique constraint "user_info_pkey"':
+                        update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
+                        await self.bot.pgdb.execute(update_query, discord.utils.utcnow(), None, after.id)
+                    else:
+                        print(e)
+        elif "offline" in before.status:
+            async with connection.transaction():
+                try:
+                    user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
+                    await self.bot.pgdb.execute(user_info_query, after.id, None, discord.utils.utcnow())
+                except Exception as e:
+                    if e.message == 'duplicate key value violates unique constraint "user_info_pkey"':
+                        update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
+                        await self.bot.pgdb.execute(update_query, None, discord.utils.utcnow(), after.id)
+                    else:
+                        print(e)
+        await self.bot.pgdb.release(connection)
 
 async def setup(client):
     await client.add_cog(chromacom(client))

@@ -4,6 +4,7 @@ import datetime
 import platform
 import time
 from typing import Optional
+import humanize
 
 class Misc(commands.Cog, name="Misc"):
     """Miscellaneous commands"""
@@ -148,11 +149,37 @@ class Misc(commands.Cog, name="Misc"):
         if user.banner is not None:
             embed.set_image(url=user.banner)
         embed.set_thumbnail(url=member.avatar.url)
+        data = await self.get_user_data(member.id)
+        try:
+            if data['last_seen'] == None:
+                await embed.add_field(name="Activity", value=f'Been active for **{humanize.precisedelta(discord.utils.utcnow() - data["online_since"], minimum_unit="seconds", format="%0.0f")}**')
+            else:
+                await embed.add_field(name="Activity", value=f'Went offline {discord.utils.format_dt(data["last_seen"], "R")}')
+        except Exception as error:
+            if str(error) == "'NoneType' object is not subscriptable":
+                return
+            else:
+                print(error)
         embed.add_field(name="<:name:938019997656174622> Nickname", value=member.nick, inline=False)
         embed.add_field(name="<:magicwand:938019572165009448> Created at", value=f"<t:{int(created)}:D> (<t:{int(created)}:R>)", inline=False)
         embed.add_field(name="<:green_arrow:937770497557553222> Joined", value=f"<t:{int(joined)}:D> (<t:{int(joined)}:R>)", inline=False)
         embed.add_field(name="<a:badges:938023584142622791> Badges", value=f"{badges}", inline=False)
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['a'])
+    async def activity(self, ctx, member: Optional[discord.Member]):
+        if not member:
+            member = ctx.author
+        data = await self.get_user_data(member.id)
+        embed = discord.Embed(title="Activity")
+        try:
+            if data['last_seen'] == None:
+                embed.description = f'{member.display_name} has been active for **{humanize.precisedelta(discord.utils.utcnow() - data["online_since"], minimum_unit="seconds", format="%0.0f")}**'
+            else:
+                embed.description = f'{member.display_name} went offline {discord.utils.format_dt(data["last_seen"], "R")}'
+        except Exception as error:
+            if str(error) == "'NoneType' object is not subscriptable":
+                await ctx.send("I don't have activity data on this user!")
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))
