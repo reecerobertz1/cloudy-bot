@@ -182,6 +182,7 @@ class Misc(commands.Cog, name="Misc"):
                 embed.description = f'{member.display_name} has been active for **{humanize.precisedelta(discord.utils.utcnow() - data["online_since"], minimum_unit="seconds", format="%0.0f")}**'
             else:
                 embed.description = f'{member.display_name} went offline {discord.utils.format_dt(data["last_seen"], "R")}'
+            await ctx.reply(embed=embed)
         except Exception as error:
             if str(error) == "'NoneType' object is not subscriptable":
                 await ctx.send("I don't have activity data on this user!")
