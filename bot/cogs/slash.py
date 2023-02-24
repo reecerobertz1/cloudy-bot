@@ -22,19 +22,19 @@ class Recruit(discord.ui.Modal, title="Chroma Recruit"):
 		embed.set_thumbnail(url="https://rqinflow.com/static/chroma-pfp-animation.gif")
 		if self.other.value:
 			embed.add_field(name="Anything else", value=self.other.value, inline=False)
-		async with interaction.bot.db.cursor() as cursor:
+		async with interaction.client.db.cursor() as cursor:
 			try:
 				await cursor.execute('''INSERT INTO applications (user_id, instagram, accepted) VALUES (?, ?, ?)''', (interaction.user.id, self.instagram.value, 0))
-				await interaction.bot.db.commit()
+				await interaction.client.db.commit()
 			except Exception as e:
 				if str(e) == "UNIQUE constraint failed: applications.instagram":
 					return await interaction.followup.send(f"An entry for **{self.instagram.value}** has already been registered. If this wasn't you, please notify a staff member and they will help you out!", ephemeral=True)
 				else:
 					print(str(e))
 					return await interaction.followup.send("Something went wrong!", ephemeral=True)
-			msg = await interaction.bot.get_channel(835497793703247903).send(embed=embed)
+			msg = await interaction.client.get_channel(835497793703247903).send(embed=embed)
 			await cursor.execute('''UPDATE applications SET msg_id = ? WHERE user_id = ?''', (msg.id, interaction.user.id))
-			await interaction.bot.db.commit()
+			await interaction.client.db.commit()
 		await interaction.followup.send(f'Thanks for joining the recruit!', ephemeral=True)
 
 	async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
@@ -49,7 +49,7 @@ class CommunityRecruits(commands.Cog, name="Recruit Commands"):
 
 	@app_commands.command(description="Join the Chroma Recruit")
 	async def apply(self, interaction: discord.Interaction):
-		async with interaction.bot.db.cursor() as cursor:
+		async with interaction.client.db.cursor() as cursor:
 			await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (interaction.user.id,))
 			row = await cursor.fetchone()
 			if row:
