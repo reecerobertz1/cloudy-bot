@@ -34,6 +34,8 @@ class Misc(commands.Cog, name="Misc"):
             badgeslist.append("<:bravery_icon:937767201094631444> HypeSquad Bravery")
         elif "hypesquad_brilliance" in str(flags):
             badgeslist.append("<:brilliance_icon:937770447838281758> HypeSquad Brilliance")
+        if "active_developer" in str(flags):
+            badgeslist.append("<:active_dev:1078684899172692020> Active Developer")
         if member.avatar.is_animated():
             badgeslist.append("<:nitro_icon:937770475625525289> Nitro")
         elif member.discriminator == "0001":
