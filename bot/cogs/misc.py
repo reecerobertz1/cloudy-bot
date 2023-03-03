@@ -139,7 +139,7 @@ class Misc(commands.Cog, name="Misc"):
         embed.add_field(name="Typing latency", value=f"{int(duration)}ms", inline=False)
         await message.edit(embed=embed)
 
-    @commands.command(help="sends info about a user")
+    @commands.command(help="Sends info about a user")
     async def userinfo(self, ctx, member: discord.Member=None):
         if member == None:
             member = ctx.author
@@ -175,6 +175,7 @@ class Misc(commands.Cog, name="Misc"):
 
     @commands.command(aliases=['act'])
     async def activity(self, ctx, member: Optional[discord.Member]):
+        """Sends activity status"""
         if not member:
             member = ctx.author
         data = await self.get_user_data(member.id)
