@@ -190,5 +190,9 @@ class Misc(commands.Cog, name="Misc"):
             if str(error) == "'NoneType' object is not subscriptable":
                 await ctx.send("I don't have activity data on this user!")
 
+    @commands.command()
+    async def source(self, ctx):
+        await ctx.send("https://github.com/rqinflow/cloudy-bot")
+
 async def setup(bot):
     await bot.add_cog(Misc(bot))
