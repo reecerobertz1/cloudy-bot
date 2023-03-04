@@ -47,6 +47,9 @@ class CommandErrorHandler(commands.Cog):
         elif isinstance(error, commands.MissingRole):
             await ctx.send("You don't have the required role(s) to run this command!")
 
+        elif isinstance(error, commands.NotOwner):
+            await ctx.reply("This command is only for the bot owner (not you!)")
+
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"You are missing the {error.param.name} argument! To see required arguments for your current command do {ctx.prefix}help {ctx.command.qualified_name}")
 
