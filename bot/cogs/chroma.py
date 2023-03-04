@@ -8,7 +8,6 @@ from setup.config import *
 import firebase_admin
 from firebase_admin import db
 from firebase_admin import credentials
-from setup.config import *
 from urllib.parse import quote_plus
 
 cred2 = credentials.Certificate(second_config)
@@ -27,6 +26,9 @@ class DownloadView(discord.ui.View):
 class Chroma(commands.Cog, name="Chroma", description="Includes the commands associated with [Chroma group](https://www.instagram.com/chromagrp) and its members!"):
     def __init__(self, bot):
         self.bot = bot
+
+    def cog_unload(self) -> None:
+        firebase_admin.delete_app(secondaryApp)
 
     @commands.command(aliases=["edit"])
     async def edits(self, ctx):
