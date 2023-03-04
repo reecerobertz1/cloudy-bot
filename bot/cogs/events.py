@@ -63,6 +63,8 @@ class events(commands.Cog):
             await message.channel.send("You have now summoned the toji simp")
         if "kijn" in message.content:
             await message.channel.send("kay and tijn are soulmates!!!")
+        if message.content == "luki":
+            await message.reply("the straightest male fr")
         if message.content.lower() == 'chroma':
             author = message.author.mention
             await message.channel.send(f'{author} loves chroma <a:c9:784237655545610290>')
