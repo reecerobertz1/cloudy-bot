@@ -1,10 +1,7 @@
 import discord
 from discord.ext import commands
 import random
-import os
-import json
 from firebase_admin import db
-import typing
 from io import BytesIO
 import ftplib
 from setup.config import *
@@ -12,12 +9,20 @@ import firebase_admin
 from firebase_admin import db
 from firebase_admin import credentials
 from setup.config import *
+from urllib.parse import quote_plus
 
 cred2 = credentials.Certificate(second_config)
 secondaryApp = firebase_admin.initialize_app(cred2, {
     'databaseURL' : dburl2,
     'storageBucket' : storageURL2
 }, name="secondary")
+
+class DownloadView(discord.ui.View):
+    def __init__(self, username: str):
+        super().__init__()
+
+        username = quote_plus(username)
+        self.add_item(discord.ui.Button(label='Download', url=f'https://cdn.rqinflow.com/files/{username}.mp4'))
 
 class Chroma(commands.Cog, name="Chroma", description="Includes the commands associated with [Chroma group](https://www.instagram.com/chromagrp) and its members!"):
     def __init__(self, bot):
@@ -29,7 +34,7 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
         ref = db.reference("edits", app=secondaryApp)
         edits = ref.get()
         edit = random.choice(edits)
-        await ctx.send("https://cloudy.rqinflow.com/" + edit)
+        await ctx.send("https://cloudy.rqinflow.com/" + edit, view=DownloadView(edit))
 
     @commands.command(aliases=["upl"])
     async def upload(self, ctx, username: str):
