@@ -158,7 +158,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
 
     @commands.command() 
     async def oldcs(self, ctx):
-        """Sends a prettier color scheme"""
+        """Sends one of cloudy's old color scheme"""
         """ ranpal = random.choice(["YlOrRd",
                 "YlOrBr",
                 "YlGnBu",
@@ -201,6 +201,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
 
     @commands.command(aliases=["cs", "scheme", "palette", "colors", "color"])
     async def colorscheme(self, ctx):
+        """Sends a color palette"""
         palette_func = functools.partial(self.gen_palette)
         buffer = await self.bot.loop.run_in_executor(None, palette_func)
         await ctx.reply(file=discord.File(fp=buffer, filename="palette.png"), mention_author=False)
@@ -254,10 +255,10 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
             name = member.display_name.split(" | ")
             if len(name) > 1:
                 members.append(name[1])
-            mem = random.choice(members)
-            embed = discord.Embed(color=discord.Colour.blurple())
-            embed.set_author(name="Chroma")
-            embed.add_field(name="Click on the username to go to their Instagram", value=f"[{mem}](https://instagram.com/{mem})")
+        mem = random.choice(members)
+        embed = discord.Embed(color=discord.Colour.blurple())
+        embed.set_author(name="Chroma")
+        embed.add_field(name="Click on the username to go to their Instagram", value=f"[{mem.lower()}](https://instagram.com/{mem.lower()})")
         await ctx.send(embed=embed)
 
 async def setup(bot):
