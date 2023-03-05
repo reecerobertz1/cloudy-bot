@@ -505,7 +505,18 @@ users = [
     'aelestic'
 ]
 
-palettes = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 
+new_palettes = [
+    ["#2C3333", "#2E4F4F", "#0E8388", "#CBE4DE"],
+    ["#3A98B9", "#FFF1DC", "#E8D5C4", "#EEEEEE"],
+    ["#2B3467", "#BAD7E9", "#FCFFE7", "#EB455F"],
+    ["#F7C8E0", "#DFFFD8", "#B4E4FF", "#95BDFF"],
+    ["#635985", "#443C68", "#393053", "#18122B"],
+    ["#EDF1D6", "#9DC08B", "#609966", "#40513B"],
+    ["#4D455D", "#E96479", "#F5E9CF", "#7DB9B6"],
+    ["#FBE7C6", "#B4F8C8", "#A0E7E5", "#FFAEBC"]
+]
+
+old_palettes = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 
  'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 
  'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 
  'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 

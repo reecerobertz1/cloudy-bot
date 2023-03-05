@@ -29,16 +29,6 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     def __init__(self, bot):
         self.bot = bot
 
-    def defined_color(self, color_count: int):
-        ranpal = random.choice(palettes)
-        palette = sns.color_palette(ranpal, color_count)
-        buffer = BytesIO()
-        sns.palplot(palette)
-        plt.axis('off')
-        plt.savefig(buffer, format="png", bbox_inches="tight", transparent=True)
-        buffer.seek(0)
-        return buffer
-
     def spotify_card(self, member: discord.Member, album: str):
         """Generate a Spotify Card for a member"""
         spotify = discord.utils.find(lambda a: isinstance(a, discord.Spotify), member.activities)
@@ -302,13 +292,6 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     async def areas(self, ctx):
         embed = discord.Embed(title="List of valid Areas", description="• Africa\n• America\n• Antarctica\n• Arctic\n• Asia\n• Atlantic\n• Australia\n• Europe\n• Indian\n• Pacific", color=discord.Colour.random())
         await ctx.send(embed=embed)
-
-    @commands.command()
-    async def color(self, ctx, color_count: int):
-        """Sends a color palette with the specified amount of colors"""
-        color_func = functools.partial(self.defined_color, color_count)
-        buffer = await self.bot.loop.run_in_executor(None, color_func)
-        await ctx.send(file=discord.File(fp=buffer, filename="palette.png"))
 
     @commands.command(help="Sends a cat photo")
     async def cat(self, ctx):

@@ -8,15 +8,15 @@ from typing import Union
 import functools
 import aiohttp
 from colorthief import ColorThief
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 import json
-from setup.lists import palettes
+from setup.lists import palettes, new_palettes
 
 class Editingstuff(commands.Cog, name="Editing", description="Includes the commands you would wanna use for editing!"):
     def __init__(self, bot):
         self.bot = bot
 
-    def reg_palette(self):
+    def reg_palette(self) -> BytesIO:
         ranpal = random.choice(palettes)
         palette = sns.color_palette(ranpal, 5)
         buffer = BytesIO()
@@ -25,8 +25,24 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
         plt.savefig(buffer, format="png", bbox_inches="tight", transparent=True)
         buffer.seek(0)
         return buffer
+    
+    def gen_palette(self) -> BytesIO:
+        font2 = ImageFont.truetype("Karla-Bold.ttf", 20)
+        s = 200
+        colors = random.choice(new_palettes)
+        img = Image.new('RGB', (s*len(colors), 225), (255, 255, 255))
+        for i, color in enumerate(colors):
+            col = Image.new('RGBA', (s, s+25), color)
+            img.paste(col, (i*s, 0))
+            drw = ImageDraw.Draw(img, 'RGBA')
+            drw.rectangle(((i*s, s), ((i+1)*s, s+25)), (0, 0, 0, 65))
+            drw.text(((i+0.5)*s, s), f"{color.upper()}", color, font=font2, anchor="ma")
+        buf = BytesIO()
+        img.save(buf, 'PNG')
+        buf.seek(0)
+        return buf
 
-    def get_palette(self, image):
+    def get_palette(self, image) -> BytesIO:
         temp_img = Image.open(image)
         if temp_img.width > 256 or temp_img.height > 256:
             temp_img.thumbnail((256, 256))
@@ -138,8 +154,8 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
                                           "warp squeeze",
                                           "ink splash"]))
 
-    @commands.command(aliases=['scheme', 'cs']) 
-    async def colorscheme(self, ctx):
+    @commands.command(aliases=['oldscheme', 'oldcs']) 
+    async def oldcs(self, ctx):
         """Sends a prettier color scheme"""
         """ ranpal = random.choice(["YlOrRd",
                 "YlOrBr",
@@ -180,6 +196,12 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
         color_func = functools.partial(self.reg_palette)
         buffer = await self.bot.loop.run_in_executor(None, color_func)
         await ctx.send(file=discord.File(fp=buffer, filename="colorpalette.png"))
+
+    @commands.command(aliases=["cs", "scheme", "palette", "colors", "color"])
+    async def colorscheme(self, ctx):
+        palette_func = functools.partial(self.gen_palette)
+        buffer = await self.bot.loop.run_in_executor(None, palette_func)
+        await ctx.reply(file=discord.File(fp=buffer, filename="palette.png"))
 
     @commands.command(aliases=["makepalette", "generatepalette", "gp", "mp"])
     async def getpalette(self, ctx, image_source: Union[discord.Member, str]=None):
