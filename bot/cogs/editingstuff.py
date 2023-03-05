@@ -154,7 +154,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
                                           "warp squeeze",
                                           "ink splash"]))
 
-    @commands.command(aliases=['oldscheme']) 
+    @commands.command() 
     async def oldcs(self, ctx):
         """Sends a prettier color scheme"""
         """ ranpal = random.choice(["YlOrRd",
