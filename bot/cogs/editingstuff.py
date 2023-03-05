@@ -254,11 +254,11 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
                 continue
             name = member.display_name.split(" | ")
             if len(name) > 1:
-                members.append(name[1])
+                members.append([str(name[1]), member])
         mem = random.choice(members)
         embed = discord.Embed(color=discord.Colour.blurple())
-        embed.set_author(name="Chroma")
-        embed.add_field(name="Click on the username to go to their Instagram", value=f"[{mem.lower()}](https://instagram.com/{mem.lower()})")
+        embed.set_author(name="Chroma", icon_url=mem[1].display_avatar.url)
+        embed.add_field(name="Click on the username to go to their Instagram", value=f"[{mem[0].lower()}](https://instagram.com/{mem[0].lower()})")
         await ctx.send(embed=embed)
 
 async def setup(bot):
