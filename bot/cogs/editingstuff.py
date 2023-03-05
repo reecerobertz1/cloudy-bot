@@ -10,7 +10,7 @@ import aiohttp
 from colorthief import ColorThief
 from PIL import Image, ImageFont, ImageDraw
 import json
-from setup.lists import palettes, new_palettes
+from setup.lists import *
 
 class Editingstuff(commands.Cog, name="Editing", description="Includes the commands you would wanna use for editing!"):
     def __init__(self, bot):
