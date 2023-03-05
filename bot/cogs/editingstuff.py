@@ -203,7 +203,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
     async def colorscheme(self, ctx):
         palette_func = functools.partial(self.gen_palette)
         buffer = await self.bot.loop.run_in_executor(None, palette_func)
-        await ctx.reply(file=discord.File(fp=buffer, filename="palette.png"))
+        await ctx.reply(file=discord.File(fp=buffer, filename="palette.png"), mention_author=False)
 
     @commands.command(aliases=["makepalette", "generatepalette", "gp", "mp"])
     async def getpalette(self, ctx, image_source: Union[discord.Member, str]=None):
@@ -244,6 +244,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
 
     @commands.command()
     async def member(self, ctx):
+        """Sends a random Chroma member"""
         members = []
         guild = self.bot.get_guild(694010548605550675)
         mems = guild.members
