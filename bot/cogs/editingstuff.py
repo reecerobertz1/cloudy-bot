@@ -27,9 +27,11 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
         return buffer
     
     def gen_palette(self) -> BytesIO:
+        with open("utils/palettes.json", "r") as f:
+            new_palettes = json.load(f)
+            colors = random.choice(new_palettes)
         font2 = ImageFont.truetype("Karla-Bold.ttf", 20)
         s = 200
-        colors = random.choice(new_palettes)
         img = Image.new('RGB', (s*len(colors), 225), (255, 255, 255))
         for i, color in enumerate(colors):
             col = Image.new('RGBA', (s, s+25), color)
