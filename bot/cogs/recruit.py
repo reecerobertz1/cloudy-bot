@@ -36,34 +36,38 @@ class Recruit(commands.Cog):
     async def accept(self, ctx):
         """Accept a member"""
         if ctx.message.reference is not None:
-            channel_id = 694010549532360726
-            channel = self.bot.get_channel(channel_id)
-            msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-            user_id = msg.embeds[0].fields[0].value
-            async with self.bot.db.cursor() as cursor:
-                await cursor.execute('''UPDATE applications SET accepted = 1 WHERE user_id = ?''', (user_id,))
-                await self.bot.db.commit()
-                await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (user_id,))
-                row = await cursor.fetchone()
-            embed = msg.embeds[0]
-            embed.add_field(name="Status", value="Accepted ✅")
-            member = ctx.guild.get_member(int(user_id))
-            await ctx.message.add_reaction("✅")
-            await msg.edit(embed=embed)
-            member_embed = discord.Embed(title="Congrats, you got into Chroma!", description="**Read the rules before joining the Chroma discord!**")
-            member_embed.add_field(name="\u200b", value=chroma_welc)
-            embed.set_thumbnail(url="https://rqinflow.com/static/chroma_pfp.png")
-            await member.send(embed=member_embed)
-            link = await channel.create_invite(max_age = 86400, max_uses = 1, unique = True)
-            await member.send(f"**Here's the link! <3**\n{link}")
-            roleid = 836244165637046283
-            role = ctx.guild.get_role(roleid)
-            msgchannel = self.bot.get_channel(835837557036023819)
-            sendch = self.bot.get_channel(836677673681944627)
-            await member.add_roles(role)
-            embed2 = discord.Embed(description=f"**you accepted {row[1]} / {member.mention}!**")
-            await msgchannel.send(embed=embed2)
-            await sendch.send(f"**you need to follow:**\nhttps://instagram.com/{row[1]}")
+            try:
+                channel_id = 694010549532360726
+                channel = self.bot.get_channel(channel_id)
+                msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+                user_id = msg.embeds[0].fields[0].value
+                async with self.bot.db.cursor() as cursor:
+                    await cursor.execute('''UPDATE applications SET accepted = 1 WHERE user_id = ?''', (user_id,))
+                    await self.bot.db.commit()
+                    await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (user_id,))
+                    row = await cursor.fetchone()
+                embed = msg.embeds[0]
+                embed.add_field(name="Status", value="Accepted ✅")
+                member = ctx.guild.get_member(int(user_id))
+                await ctx.message.add_reaction("✅")
+                await msg.edit(embed=embed)
+                member_embed = discord.Embed(title="Congrats, you got into Chroma!", description="**Read the rules before joining the Chroma discord!**")
+                member_embed.add_field(name="\u200b", value=chroma_welc)
+                embed.set_thumbnail(url="https://rqinflow.com/static/chroma_pfp.png")
+                await member.send(embed=member_embed)
+                link = await channel.create_invite(max_age = 86400, max_uses = 1, unique = True)
+                await member.send(f"**Here's the link! <3**\n{link}")
+                roleid = 836244165637046283
+                role = ctx.guild.get_role(roleid)
+                msgchannel = self.bot.get_channel(835837557036023819)
+                sendch = self.bot.get_channel(836677673681944627)
+                await member.add_roles(role)
+                embed2 = discord.Embed(description=f"**you accepted {row[1]} / {member.mention}!**")
+                await msgchannel.send(embed=embed2)
+                await sendch.send(f"**you need to follow:**\nhttps://instagram.com/{row[1]}")
+            except discord.errors.Forbidden():
+                embed = discord.Embed(title="Error", description=f"```py\nForbidden\nI can't dm this user.```", color=0xe63241)
+                await ctx.reply(embed=embed)
         else:
             return await ctx.send("No message reference found.")
 

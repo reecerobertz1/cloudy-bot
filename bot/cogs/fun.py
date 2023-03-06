@@ -151,12 +151,15 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     @commands.command()
     async def dm(self, ctx, member: typing.Optional[discord.Member], *, message: str):
         """Send a DM to someone via Cloudy, or get Cloudy to DM you"""
-        if member == None:
-            ctx.author.send(message)
-        else:
-            await member.send(f'{message}\n``sent from {ctx.author.display_name}``')
-        message = ctx.message
-        await message.add_reaction('💌')
+        try:
+            if member == None:
+                ctx.author.send(message)
+            else:
+                await member.send(f'{message}\n``sent from {ctx.author.display_name}``')
+            message = ctx.message
+            await message.add_reaction('💌')
+        except discord.errors.Forbidden():
+            await ctx.reply("I can't dm this user!")
 
     @commands.command()
     async def embed(self, ctx, *, message:str):

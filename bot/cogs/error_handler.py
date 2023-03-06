@@ -10,6 +10,7 @@ class CommandErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.webhook = discord.Webhook.from_url(webhook_url, session = aiohttp.ClientSession())
+        self.color = 0xe63241
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -36,7 +37,8 @@ class CommandErrorHandler(commands.Cog):
             return
 
         if isinstance(error, commands.DisabledCommand):
-            await ctx.send(f'{ctx.command} has been disabled.')
+            embed = discord.Embed(title="Error", description=f"```py\nDisabled Command```\nThis command is disabled.", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False) 
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
@@ -44,14 +46,25 @@ class CommandErrorHandler(commands.Cog):
             except discord.HTTPException:
                 pass
 
+        elif isinstance(error, commands.MissingRequiredArgument):
+            embed = discord.Embed(title="Error", description=f"```py\nMissing Required Argument: {error.param.name}```\nTo see the required argument for your current command do {ctx.prefix}help {ctx.command.qualified_name}", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False)
+
         elif isinstance(error, commands.MissingRole):
-            await ctx.send("You don't have the required role(s) to run this command!")
+            embed = discord.Embed(title="Error", description=f"```py\nMissing Role```\nYou don't have the required role(s) to run this command!", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False)
 
         elif isinstance(error, commands.NotOwner):
-            await ctx.reply("This command is only for the bot owner (not you!)")
+            embed = discord.Embed(title="Error", description=f"```py\nNot owner```\nTo run this command you have to be the owner of the bot.", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False)
 
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"You are missing the {error.param.name} argument! To see required arguments for your current command do {ctx.prefix}help {ctx.command.qualified_name}")
+        elif isinstance(error, commands.UserNotFound):
+            embed = discord.Embed(title="Error", description=f"```py\nUser Not Found```\nI can't find that user!", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False)
+
+        elif isinstance(error, commands.UserNotFound):
+            embed = discord.Embed(title="Error", description=f"```py\nMember Not Found```\nI can't find that member!", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False)
 
         else:
             await ctx.send(f"I'm sorry! I ran into an error while trying to execute `{ctx.command}`, the developer has been notified!")
