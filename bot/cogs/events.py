@@ -151,19 +151,17 @@ class events(commands.Cog):
             if "offline" in after.status:
                 async with connection.transaction():
                     try:
-                        user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
+                        user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET last_seen = $2, online_since = $3"
                         await connection.execute(user_info_query, after.id, discord.utils.utcnow(), None)
-                    except asyncpg.exceptions.UniqueViolationError:
-                        update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
-                        await connection.execute(update_query, discord.utils.utcnow(), None, after.id)
+                    except Exception as e:
+                        print(e)
             elif "offline" in before.status:
                 async with connection.transaction():
                     try:
-                        user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
+                        user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET last_seen = $2, online_since = $3"
                         await connection.execute(user_info_query, after.id, None, discord.utils.utcnow())
-                    except asyncpg.exceptions.UniqueViolationError:
-                        update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
-                        await connection.execute(update_query, None, discord.utils.utcnow(), after.id)
+                    except Exception as e:
+                        print(e)
             await self.bot.pool.release(connection)
 
 async def setup(bot):
