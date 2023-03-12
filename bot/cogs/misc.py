@@ -49,7 +49,10 @@ class Misc(commands.Cog, name="Misc"):
 
     async def get_user_data(self, userid):
         query = "SELECT * FROM user_info WHERE user_id = $1;"
-        info = await self.bot.pgdb.fetchrow(query, userid)
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                info = await connection.fetchrow(query, userid)
+        self.bot.pool.release(connection)
         return info
 
     @commands.command()
@@ -139,8 +142,9 @@ class Misc(commands.Cog, name="Misc"):
         embed.add_field(name="Typing latency", value=f"{int(duration)}ms", inline=False)
         await message.edit(embed=embed)
 
-    @commands.command(help="Sends info about a user")
+    @commands.command(help="Sends info about a user", aliases=['ui'])
     async def userinfo(self, ctx, member: discord.Member=None):
+        """Get info about a user"""
         if member == None:
             member = ctx.author
         createdat = member.created_at
@@ -192,6 +196,7 @@ class Misc(commands.Cog, name="Misc"):
 
     @commands.command()
     async def source(self, ctx):
+        """Get cloudy's source code"""
         await ctx.send("https://github.com/rqinflow/cloudy-bot")
 
 async def setup(bot):

@@ -69,15 +69,17 @@ class CloudyBot(commands.Bot):
         self.embed_color = 0x2B2D31
 
         credentials = {"user": postgres_user, "password": postgres_password, "database": postgres_db, "host": postgres_host}
-        pgdb = await asyncpg.create_pool(**credentials)
-        await pgdb.execute("CREATE TABLE IF NOT EXISTS user_info (user_id bigint PRIMARY KEY , last_seen timestamp with time zone, online_since timestamp with time zone)")
+        pool = await asyncpg.create_pool(**credentials)
+        async with pool.acquire() as connection:
+            async with connection.transaction():
+                await connection.execute("CREATE TABLE IF NOT EXISTS user_info (user_id bigint PRIMARY KEY , last_seen timestamp with time zone, online_since timestamp with time zone)")
 
         dbase = await aiosqlite.connect("utils/recruit.db")
         async with dbase.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS applications (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, accepted INTEGER, msg_id INTEGER)") 
 
         self.db = dbase
-        self.pgdb = pgdb
+        self.pool = pool
 
     async def close(self):
         await super().close()

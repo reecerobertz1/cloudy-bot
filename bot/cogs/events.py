@@ -146,30 +146,30 @@ class events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
-        connection = await self.bot.pgdb.acquire()
-        if "offline" in after.status:
-            async with connection.transaction():
-                try:
-                    user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
-                    await self.bot.pgdb.execute(user_info_query, after.id, discord.utils.utcnow(), None)
-                except Exception as e:
-                    if e.message == 'duplicate key value violates unique constraint "user_info_pkey"':
-                        update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
-                        await self.bot.pgdb.execute(update_query, discord.utils.utcnow(), None, after.id)
-                    else:
-                        print(e)
-        elif "offline" in before.status:
-            async with connection.transaction():
-                try:
-                    user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
-                    await self.bot.pgdb.execute(user_info_query, after.id, None, discord.utils.utcnow())
-                except Exception as e:
-                    if e.message == 'duplicate key value violates unique constraint "user_info_pkey"':
-                        update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
-                        await self.bot.pgdb.execute(update_query, None, discord.utils.utcnow(), after.id)
-                    else:
-                        print(e)
-        await self.bot.pgdb.release(connection)
+        async with self.bot.pool.acquire() as connection:
+            if "offline" in after.status:
+                async with connection.transaction():
+                    try:
+                        user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
+                        await connection.execute(user_info_query, after.id, discord.utils.utcnow(), None)
+                    except Exception as e:
+                        if e.message == 'duplicate key value violates unique constraint "user_info_pkey"':
+                            update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
+                            await connection.execute(update_query, discord.utils.utcnow(), None, after.id)
+                        else:
+                            print(e)
+            elif "offline" in before.status:
+                async with connection.transaction():
+                    try:
+                        user_info_query = "INSERT INTO user_info (user_id, last_seen, online_since) VALUES ($1, $2, $3)"
+                        await connection.execute(user_info_query, after.id, None, discord.utils.utcnow())
+                    except Exception as e:
+                        if e.message == 'duplicate key value violates unique constraint "user_info_pkey"':
+                            update_query = '''UPDATE user_info SET last_seen = $1, online_since = $2 WHERE user_id = $3'''
+                            await connection.execute(update_query, None, discord.utils.utcnow(), after.id)
+                        else:
+                            print(e)
+            await self.bot.pool.release(connection)
 
 async def setup(bot):
     await bot.add_cog(events(bot))
