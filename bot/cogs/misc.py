@@ -210,7 +210,7 @@ class Misc(commands.Cog, name="Misc"):
     async def afk(self, ctx, *, reason: str):
         """Set an afk reason when you go afk"""
         await self.set_afk(ctx.author.id, reason)
-        await ctx.reply(f"✅ Succesfully set your afk reason to `{reason}`!")
+        await ctx.reply(f"✅ Successfully set your afk reason to `{reason}`!")
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))
