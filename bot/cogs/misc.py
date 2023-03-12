@@ -52,7 +52,7 @@ class Misc(commands.Cog, name="Misc"):
         async with self.bot.pool.acquire() as connection:
             async with connection.transaction():
                 info = await connection.fetchrow(query, userid)
-        self.bot.pool.release(connection)
+        await self.bot.pool.release(connection)
         return info
 
     @commands.command()
