@@ -117,7 +117,7 @@ class events(commands.Cog):
         stored_guild_id = 694010548605550675
         if member.guild.id == stored_guild_id:
             embed = discord.Embed(title="Member left!", color=0x96bfff, description=f"{member.mention} has left the discord.")
-            embed.set_thumbnail(icon_url=member.display_avatar.url)
+            embed.set_thumbnail(url=member.display_avatar.url)
             embed.set_footer(text='i hope to see you again!', icon_url='https://cdn.discordapp.com/attachments/799984745772875786/800015677653909504/yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png')
             channel = self.bot.get_channel(725389930607673384)
             await channel.send(embed=embed)
