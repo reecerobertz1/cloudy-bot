@@ -73,6 +73,7 @@ class CloudyBot(commands.Bot):
         async with pool.acquire() as connection:
             async with connection.transaction():
                 await connection.execute("CREATE TABLE IF NOT EXISTS user_info (user_id bigint PRIMARY KEY , last_seen timestamp with time zone, online_since timestamp with time zone)")
+                await connection.execute("CREATE TABLE IF NOT EXISTS afk (user_id bigint PRIMARY KEY , reason text , time timestamp with time zone)")
 
         dbase = await aiosqlite.connect("utils/recruit.db")
         async with dbase.cursor() as cursor:
