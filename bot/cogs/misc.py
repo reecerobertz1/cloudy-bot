@@ -54,6 +54,13 @@ class Misc(commands.Cog, name="Misc"):
                 info = await connection.fetchrow(query, userid)
         await self.bot.pool.release(connection)
         return info
+    
+    async def set_afk(self, userid: int, reason: str) -> None:
+        query = "INSERT INTO afk (user_id, reason, time) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET reason = $2, time = $3"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                await connection.execute(query, userid, reason, discord.utils.utcnow())
+        await self.bot.pool.release(connection)
 
     @commands.command()
     @can_close()
@@ -198,6 +205,12 @@ class Misc(commands.Cog, name="Misc"):
     async def source(self, ctx):
         """Get cloudy's source code"""
         await ctx.send("https://github.com/rqinflow/cloudy-bot")
+
+    @commands.command()
+    async def afk(self, ctx, *, reason: str):
+        """Set an afk reason when you go afk"""
+        await self.set_afk(ctx.author.id, reason)
+        await ctx.reply(f"✅ Succesfully set your afk reason to `{reason}`!")
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))

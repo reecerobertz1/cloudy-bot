@@ -1,12 +1,33 @@
 import discord
 from discord.ext import commands
 import json
-from typing import Optional
-import asyncpg
+from typing import TypedDict
+import datetime
+import humanize
+
+class AFK(TypedDict):
+    user_id: int
+    reason: str
+    time: datetime.datetime
 
 class events(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
+
+    async def check_afk(self, userid: int) -> AFK:
+        query = "SELECT reason, time, user_id FROM afk WHERE user_id = $1"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                afk = await connection.fetchrow(query, userid)
+        await self.bot.pool.release(connection)
+        return afk
+    
+    async def delete_afk(self, userid: int) -> None:
+        query = "DELETE FROM afk WHERE user_id = $1"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                await connection.execute(query, userid)
+        await self.bot.pool.release(connection)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -33,7 +54,7 @@ class events(commands.Cog):
         if message.author.bot:
             return
         if 'starrys.aep' in message.content:
-            await message.channel.send("yes starry is the best and the love of alex's life mwah <:iheartstarrysaep:962016301344243802>")
+            await message.channel.send("yes starry is the best and the love of alex's life mwah <:cuteface:756721125399986199>")
         if 'stan kiki' in message.content:
             await message.channel.send('we stan kiki yup')
         if 'ana grandily' in message.content:
@@ -54,18 +75,18 @@ class events(commands.Cog):
             await message.channel.send('hi i love zara')
         if 'leeroni' in message.content:
             await message.channel.send('i want roni and leeron to get married!')
-        if 'ariel bae' in message.content:
-            await message.channel.send('i luv ari')
         if 'nancy luhvbott' in message.content:
             await message.channel.send('i love nancy so so much mwah <3')
         if 'kay 94suga' in message.content:
-            await message.channel.send("yoongi and cloudy loves kay confirmed")
-        if "Anis" in message.content:
-            await message.channel.send("You have now summoned the toji simp")
+            await message.channel.send('yoongi and cloudy loves kay confirmed')
+        if 'Anis' in message.content:
+            await message.channel.send('You have now summoned the toji simp')
         if "kijn" in message.content:
-            await message.channel.send("kay and tijn are soulmates!!!")
-        if message.content == "luki":
-            await message.reply("the straightest male fr")
+            await message.channel.send('kay and tijn are soulmates!!!')
+        if message.content == 'luki':
+            await message.reply('the straightest male fr', mention_author=False)
+        if message.content == 'kai':
+            await message.channel.send('**crack** <:sadjihyo:1076908378133119056>')
         if message.content.lower() == 'chroma':
             author = message.author.mention
             await message.channel.send(f'{author} loves chroma <a:c9:784237655545610290>')
@@ -85,6 +106,17 @@ class events(commands.Cog):
                     await message.channel.send(embed=embed)
                 else:
                     pass
+        afk = await self.check_afk(message.author.id)
+        if afk is None:
+            pass
+        else:
+            await self.delete_afk(message.author.id)
+            await message.channel.send(f"🔔 Welcome back, <@!{afk['user_id']}>! You were AFK for `{humanize.precisedelta(discord.utils.utcnow() - afk['time'], minimum_unit='seconds', format='%0.0f')}`")
+        if len(message.mentions) > 0:
+            for mention in message.mentions:
+                afk = await self.check_afk(mention.id)
+                if afk is not None:
+                    await message.channel.send(f"🔔 **{mention.name}** went AFK {discord.utils.format_dt(afk['time'])} with reason: `{afk['reason']}`")
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
