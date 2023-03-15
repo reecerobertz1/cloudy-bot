@@ -115,7 +115,7 @@ class events(commands.Cog):
             for mention in message.mentions:
                 afk = await self.check_afk(mention.id)
                 if afk is not None:
-                    await message.channel.send(f"🔔 **{mention.name}** went AFK {discord.utils.format_dt(afk['time']), 'R'} with reason: *{afk['reason']}*")
+                    await message.channel.send(f"🔔 **{mention.name}** went AFK {discord.utils.format_dt(afk['time'], 'R')} with reason: *{afk['reason']}*")
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
