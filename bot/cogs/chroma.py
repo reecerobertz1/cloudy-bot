@@ -9,6 +9,7 @@ import firebase_admin
 from firebase_admin import db
 from firebase_admin import credentials
 from urllib.parse import quote_plus
+from utils.subclasses import Context
 
 cred2 = credentials.Certificate(second_config)
 secondaryApp = firebase_admin.initialize_app(cred2, {
@@ -38,8 +39,8 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
         edit = random.choice(edits)
         await ctx.send("https://cloudy.rqinflow.com/" + edit, view=DownloadView(edit))
 
-    @commands.command(aliases=["upl"])
-    async def upload(self, ctx, username: str):
+    @commands.command(aliases=["upl"], hidden=True)
+    async def upload(self, ctx: Context, username: str):
         """Adds edit to edits command"""
         stored_guild_id = 694010548605550675
         if ctx.guild.id == stored_guild_id:
@@ -64,13 +65,13 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
             await ctx.send("This command can only be used in the private Chroma server.")
 
     @commands.command()
-    async def hi(self, ctx):
+    async def hi(self, ctx: Context):
         """Cloudy says hi :)"""
         name = ctx.message.author.mention
         await ctx.send(f'hi {name}! i hope ur having a great day ily<3')
 
     @commands.command()
-    async def memberinfo(self, ctx, user: discord.Member = None):
+    async def memberinfo(self, ctx: Context, user: discord.Member = None):
         """Sends info about a member"""
         stored_guild_id = 694010548605550675
         if user == None:
@@ -193,7 +194,7 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
 
     @commands.command(hidden=True)
     @commands.has_role("Server Booster")
-    async def claimperks(self, ctx):
+    async def claimperks(self, ctx: Context):
         """Command for Server Boosters to claim their perks"""
         guild = 694010548605550675
         if ctx.guild.id == guild:

@@ -4,6 +4,7 @@ import json
 from typing import TypedDict
 import datetime
 import humanize
+from utils.subclasses import Context
 
 class AFK(TypedDict):
     user_id: int
@@ -30,7 +31,7 @@ class events(commands.Cog):
         await self.bot.pool.release(connection)
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         try:
             if message.mentions[0] == self.bot.user:
 
@@ -54,7 +55,7 @@ class events(commands.Cog):
         if message.author.bot:
             return
         if 'starrys.aep' in message.content:
-            await message.channel.send("yes starry is the best and the love of alex's life mwah <:cuteface:756721125399986199>")
+            await message.channel.send('yes starry is the best and the love of alex\'s life mwah <:cuteface:756721125399986199>')
         if 'stan kiki' in message.content:
             await message.channel.send('we stan kiki yup')
         if 'ana grandily' in message.content:
@@ -79,9 +80,7 @@ class events(commands.Cog):
             await message.channel.send('i love nancy so so much mwah <3')
         if 'kay 94suga' in message.content:
             await message.channel.send('yoongi and cloudy loves kay confirmed')
-        if 'Anis' in message.content:
-            await message.channel.send('You have now summoned the toji simp')
-        if "kijn" in message.content:
+        if 'kijn' in message.content:
             await message.channel.send('kay and tijn are soulmates!!!')
         if message.content == 'luki':
             await message.reply('the straightest male fr', mention_author=False)
@@ -116,10 +115,10 @@ class events(commands.Cog):
             for mention in message.mentions:
                 afk = await self.check_afk(mention.id)
                 if afk is not None:
-                    await message.channel.send(f"🔔 **{mention.name}** went AFK {discord.utils.format_dt(afk['time'])} with reason: `{afk['reason']}`")
+                    await message.channel.send(f"🔔 **{mention.name}** went AFK {discord.utils.format_dt(afk['time']), 'R'} with reason: *{afk['reason']}*")
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member):
         public = 835498963418480650
         role = 836244165637046283
         stored_guild_id = 694010548605550675
@@ -146,7 +145,7 @@ class events(commands.Cog):
                 await member.add_roles(member.guild.get_role(role))
 
     @commands.Cog.listener()
-    async def on_member_remove(self, member):
+    async def on_member_remove(self, member: discord.Member):
         stored_guild_id = 694010548605550675
         if member.guild.id == stored_guild_id:
             embed = discord.Embed(title="Member left!", color=0x96bfff, description=f"{member.mention} has left the discord.")
@@ -156,7 +155,7 @@ class events(commands.Cog):
             await channel.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
+    async def on_guild_join(self, guild: discord.Guild):
 
 
         with open("./prefixes.json", "r") as f:
@@ -168,7 +167,7 @@ class events(commands.Cog):
             json.dump(prefixes,f, indent=4)
 
     @commands.Cog.listener()
-    async def on_guild_remove(self, guild):
+    async def on_guild_remove(self, guild: discord.Guild):
         with open("./prefixes.json", "r") as f:
             prefixes = json.load(f)
 
@@ -178,7 +177,7 @@ class events(commands.Cog):
             json.dump(prefixes,f, indent=4)
 
     @commands.Cog.listener()
-    async def on_presence_update(self, before, after):
+    async def on_presence_update(self, before: discord.Member, after: discord.Member):
         async with self.bot.pool.acquire() as connection:
             if "offline" in after.status:
                 async with connection.transaction():

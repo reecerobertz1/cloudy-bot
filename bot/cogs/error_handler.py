@@ -4,6 +4,7 @@ import sys
 from discord.ext import commands
 import aiohttp
 from setup.config import webhook_url
+from utils.subclasses import Context
 
 class CommandErrorHandler(commands.Cog):
 
@@ -13,7 +14,7 @@ class CommandErrorHandler(commands.Cog):
         self.color = 0xe63241
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: Context, error: commands.CommandError):
         """The event triggered when an error is raised while invoking a command.
         Parameters
         ------------

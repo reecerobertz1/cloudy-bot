@@ -3,6 +3,7 @@ from discord.ext import commands
 from typing import Union
 import asyncio
 from setup.config import chroma_welc
+from utils.subclasses import Context
 
 class Recruit(commands.Cog):
 
@@ -12,7 +13,7 @@ class Recruit(commands.Cog):
         self.bot = bot
 
     def is_staff():
-        async def predicate(ctx):
+        async def predicate(ctx: Context):
             role_id = 835549528932220938
             role = ctx.guild.get_role(role_id)
             return role in ctx.author.roles
@@ -20,7 +21,7 @@ class Recruit(commands.Cog):
 
     @commands.command()
     @is_staff()
-    async def accepted(self, ctx):
+    async def accepted(self, ctx: Context):
         """Get a list of all users who have been accepted"""
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT * FROM applications WHERE accepted = 1")
@@ -33,7 +34,7 @@ class Recruit(commands.Cog):
 
     @commands.command()
     @is_staff()
-    async def accept(self, ctx):
+    async def accept(self, ctx: Context):
         """Accept a member"""
         if ctx.message.reference is not None:
             try:
@@ -73,10 +74,10 @@ class Recruit(commands.Cog):
 
     @commands.command(name="rc")
     @is_staff()
-    async def recruit_check(self, ctx, member: discord.User):
+    async def recruit_check(self, ctx: Context, user: discord.User):
         """Check if a user has been accepted"""
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (member.id,))
+            await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (user.id,))
             result = await cursor.fetchone()
         if result is None:
             return await ctx.send("This user has not joined the recruit")
@@ -88,7 +89,7 @@ class Recruit(commands.Cog):
 
     @commands.command(name="wipe")
     @commands.is_owner()
-    async def wipe_recruit(self, ctx):
+    async def wipe_recruit(self, ctx: Context):
         """Wipe the recruit table"""
         await ctx.send("Are you sure you want to wipe the recruit table? Say `yes` to confirm.")
 
@@ -109,7 +110,7 @@ class Recruit(commands.Cog):
 
     @commands.command(name="da")
     @is_staff()
-    async def delete_app(self, ctx, member: discord.Member):
+    async def delete_app(self, ctx: Context, member: discord.Member):
         """Delete an application"""
         async with self.bot.db.cursor() as cursor:
             await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (member.id,))
@@ -124,7 +125,7 @@ class Recruit(commands.Cog):
 
     @commands.command(name="appinfo")
     @is_staff()
-    async def appinfo(self, ctx, member: Union[discord.Member, str]):
+    async def appinfo(self, ctx: Context, member: Union[discord.Member, str]):
         """Get information on an app"""
         if isinstance(member, discord.Member):
             async with self.bot.db.cursor() as cursor:

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import json
+from utils.subclasses import Context
 
 class Administration(commands.Cog, name="Admin", description="Administrative commands for Chroma staff"):
     def __init__(self, bot):
@@ -8,21 +9,21 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
         
     @commands.command(aliases=["invite"]) 
     @commands.has_permissions(manage_guild=True)
-    async def inv(self, ctx):
-        """Creates an invite to Chroma's Discord"""
+    async def inv(self, ctx: Context):
+        """Creates an invite to the current discord server"""
         link = await ctx.channel.create_invite(max_age = 300)
         await ctx.send(link)
 
     @commands.command(aliases=["echo"])
     @commands.has_permissions(manage_guild=True)
-    async def say(self, ctx, *, msg):
+    async def say(self, ctx: Context, *, msg: str):
         """Gets the bot to say whatever you want it to say"""
         await ctx.message.delete()
         await ctx.send("{}" .format(msg))
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def createembed(self, ctx, channel: discord.TextChannel = None):
+    async def createembed(self, ctx: Context, channel: discord.TextChannel = None):
         """Make a custom embed!"""
 
         if channel == None:
@@ -73,7 +74,7 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
 
     @commands.command()
     @commands.has_permissions(manage_messages = True)
-    async def newprefix(ctx, prefix):
+    async def newprefix(ctx: Context, prefix):
 
         with open("prefixes.json", "r") as f:
             prefixes = json.load(f)

@@ -5,10 +5,12 @@ import platform
 import time
 from typing import Optional
 import humanize
+import asyncpg
+from utils.subclasses import Context
 
 class Misc(commands.Cog, name="Misc"):
     """Miscellaneous commands"""
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     def can_close():
@@ -18,7 +20,7 @@ class Misc(commands.Cog, name="Misc"):
             return role in ctx.author.roles or ctx.author.id == ctx.channel.owner_id
         return commands.check(predicate)
     
-    def get_color(self, status):
+    def get_color(self, status: str) -> int:
         if "dnd" in status:
             color = 0xfa002e
         elif "online" in status:
@@ -27,7 +29,7 @@ class Misc(commands.Cog, name="Misc"):
             color = 0xfaaf00
         return color
 
-    def getBadges(self, member, user, flags, badgeslist):
+    def get_badges(self, member: discord.Member, user: discord.User, flags: str, badgeslist: list) -> None:
         if "hypesquad_balance" in str(flags):
             badgeslist.append("<:balance_icon:937770399880585287> HypeSquad Balance")
         elif "hypesquad_bravery" in str(flags):
@@ -47,7 +49,7 @@ class Misc(commands.Cog, name="Misc"):
         if member.premium_since is not None:
             badgeslist.append("<a:boost:938021210984419338> Booster")
 
-    async def get_user_data(self, userid):
+    async def get_user_data(self, userid: int) -> asyncpg.Record:
         query = "SELECT * FROM user_info WHERE user_id = $1;"
         async with self.bot.pool.acquire() as connection:
             async with connection.transaction():
@@ -64,7 +66,7 @@ class Misc(commands.Cog, name="Misc"):
 
     @commands.command()
     @can_close()
-    async def solved(self, ctx):
+    async def solved(self, ctx: Context):
         """Marks a form post as solved and archives it"""
         assert isinstance(ctx.channel, discord.Thread)
         await ctx.message.add_reaction("✅")
@@ -76,7 +78,7 @@ class Misc(commands.Cog, name="Misc"):
         await ctx.channel.edit(locked=True, archived=True, applied_tags=new_tags, reason=f'Marked as solved by {ctx.author} (ID: {ctx.author.id})')
 
     @commands.command(aliases=["about"])
-    async def botinfo(self, ctx):
+    async def botinfo(self, ctx: Context):
         """Sends info about the bot"""
         delta_uptime = datetime.datetime.utcnow() - self.bot.launch_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
@@ -93,7 +95,7 @@ class Misc(commands.Cog, name="Misc"):
         await message.edit(embed = embed)
 
     @commands.command()
-    async def device(self, ctx, member: Optional[discord.Member]):
+    async def device(self, ctx: Context, member: Optional[discord.Member]):
         """Gets a users current device(s)"""
         if not member:
             member = ctx.author
@@ -138,7 +140,7 @@ class Misc(commands.Cog, name="Misc"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping(self, ctx: Context):
         """Ping-pong! Sends latency"""
         embed = discord.Embed(title="🏓 Pong!")
         start = time.perf_counter()
@@ -150,7 +152,7 @@ class Misc(commands.Cog, name="Misc"):
         await message.edit(embed=embed)
 
     @commands.command(help="Sends info about a user", aliases=['ui'])
-    async def userinfo(self, ctx, member: discord.Member=None):
+    async def userinfo(self, ctx: Context, member: discord.Member=None):
         """Get info about a user"""
         if member == None:
             member = ctx.author
@@ -161,7 +163,7 @@ class Misc(commands.Cog, name="Misc"):
         flags = member.public_flags.all()
         badgeslist = []
         user = await self.bot.fetch_user(member.id)
-        self.getBadges(member, user, flags, badgeslist)
+        self.get_badges(member, user, flags, badgeslist)
         badges = ' \n'.join([str(elem) for elem in badgeslist])
         embed = discord.Embed(title=member.name)
         if user.banner is not None:
@@ -181,11 +183,12 @@ class Misc(commands.Cog, name="Misc"):
         embed.add_field(name="<:name:938019997656174622> Nickname", value=member.nick, inline=False)
         embed.add_field(name="<:magicwand:938019572165009448> Created at", value=f"<t:{int(created)}:D> (<t:{int(created)}:R>)", inline=False)
         embed.add_field(name="<:green_arrow:937770497557553222> Joined", value=f"<t:{int(joined)}:D> (<t:{int(joined)}:R>)", inline=False)
-        embed.add_field(name="<a:badges:938023584142622791> Badges", value=f"{badges}", inline=False)
+        if len(badgeslist) > 0:
+            embed.add_field(name="<a:badges:938023584142622791> Badges", value=f"{badges}", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['act'])
-    async def activity(self, ctx, member: Optional[discord.Member]):
+    async def activity(self, ctx: Context, member: Optional[discord.Member]):
         """Sends activity status"""
         if not member:
             member = ctx.author
@@ -202,15 +205,15 @@ class Misc(commands.Cog, name="Misc"):
                 await ctx.send("I don't have activity data on this user!")
 
     @commands.command()
-    async def source(self, ctx):
+    async def source(self, ctx: Context):
         """Get cloudy's source code"""
         await ctx.send("https://github.com/rqinflow/cloudy-bot")
 
     @commands.command()
-    async def afk(self, ctx, *, reason: str):
+    async def afk(self, ctx: Context, *, reason: str):
         """Set an afk reason when you go afk"""
         await self.set_afk(ctx.author.id, reason)
-        await ctx.reply(f"✅ Successfully set your afk reason to `{reason}`!")
+        await ctx.reply(f"✅ Successfully set your afk reason to *{reason}*!")
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))

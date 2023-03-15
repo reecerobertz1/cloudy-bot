@@ -1,10 +1,10 @@
 import discord
 from discord.errors import HTTPException
 from discord.ext import commands
-import firebase_admin
 from firebase_admin import db
-from firebase_admin import credentials
 import datetime
+import functools
+from utils.subclasses import Context
 
 class tag(commands.Cog, name="Tags", description="Includes information on how to use tags with cloudy!"):
     def __init__(self,bot):
@@ -15,8 +15,20 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
         #    words = f.read()
         #    badwords = words.split()
 
+    def get_user_tags(self, guildid: int, userid: int) -> str:
+        ref = db.reference("/tags/")
+        tags_dict = ref.get()
+        lst = []
+        for i in tags_dict:
+            for j, k in tags_dict[i].items():
+                owner = k["owner"]
+                if int(guildid) == int(j) and int(owner) == int(userid):
+                    lst.append(i)
+        cmds = ',\n'.join(lst)
+        return cmds
+
     @commands.group(invoke_without_command=True, aliases=['t'])
-    async def tag(self, ctx, tag_name):
+    async def tag(self, ctx: Context, tag_name):
         """Cloudy's tag commands"""
         try:
             guildid = ctx.guild.id
@@ -37,19 +49,12 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
             await ctx.reply(f"there is no tag named **{tag_name}**!")
 
     @tag.command()
-    async def create(self, ctx, tag_name=None, *, response=None):
+    async def create(self, ctx: Context, tag_name: str = None, *, response: str = None):
         """Creates a tag"""
         guildid = ctx.guild.id
         date = datetime.datetime.now().strftime("%Y-%m-%d")
         tagname = tag_name
-        msg = ctx.message.content
         owner = ctx.author.id
-        #for word in badwords:
-        #    if word in msg:
-        #        await ctx.reply("you used one or more words that aren't allowed to use in tags.")
-        #        return await ctx.message.delete()
-        #    else:
-        #        pass
         if tag_name == None:
             await ctx.send("you need a tag name")
         elif response == None:
@@ -90,7 +95,7 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
         return
 
     @tag.command()
-    async def info(self, ctx, tag_name):
+    async def info(self, ctx: Context, tag_name: str):
         """Sends info about a specific tag"""
         guildid = ctx.guild.id
         ref = db.reference(f"/tags/{tag_name}/{guildid}/owner/")
@@ -103,7 +108,7 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
         await ctx.reply(embed=embed)
 
     @tag.command()
-    async def view(self, ctx):
+    async def view(self, ctx: Context):
         """Sends a list consisting all the tags in the current guild"""
         ref = db.reference("/tags/")
         all = ref.get()
@@ -122,30 +127,23 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
         await ctx.send(embed=embed)
 
     @tag.command()
-    async def list(self, ctx, member: discord.User=None):
+    async def list(self, ctx: Context, member: discord.User=None):
         """Sends a list of the tags owned by the specified member"""
-        guilid = ctx.guild.id
+        guildid = ctx.guild.id
         if member == None:
-            id = ctx.author.id
+            userid = ctx.author.id
             name = ctx.author.display_name
         else:
-            id = member.id
+            userid = member.id
             name = member.display_name
-        ref = db.reference("/tags/")
-        tags_dict = ref.get()
-        lst = []
-        for i in tags_dict:
-            for j, k in tags_dict[i].items():
-                owner = k["owner"]
-                if int(guilid) == int(j) and int(owner) == int(id):
-                    lst.append(i)
-        cmds = ',\n'.join(lst)
+        get_list = functools.partial(self.get_user_tags, guildid, userid)
+        cmds = await self.bot.loop.run_in_executor(None, get_list)
         embed = discord.Embed(title=f"{name}'s tags", description=cmds)
         embed.set_footer(text="for info on a specific tag, do *tag info <tagname>")
         await ctx.send(embed=embed)
 
     @tag.command()
-    async def delete(self, ctx, tag_name):
+    async def delete(self, ctx: Context, tag_name: str):
         """Deletes a tag"""
         guildid = ctx.guild.id
         owner = ctx.author.id
@@ -160,7 +158,7 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
             await ctx.send("you can't delete a tag that you don't own!")
 
     @tag.command()
-    async def edit(self, ctx, tag_name=None, *, response=None):
+    async def edit(self, ctx, tag_name: str = None, *, response: str = None):
         """Edit a tag"""
         if tag_name == None:
             await ctx.send("you need to specify which tag you want to edit!")
@@ -168,12 +166,12 @@ class tag(commands.Cog, name="Tags", description="Includes information on how to
             await ctx.send("you need a response for your tag!")
         guildid = ctx.guild.id
         owner = ctx.author.id
-        ref = db.reference(f"/tags/{tag_name}/")
+        tag_ref = db.reference(f"/tags/{tag_name}/{guildid}")
         ref_owner = db.reference(f"/tags/{tag_name}/{guildid}/owner")
         author = ref_owner.get()
         if author == owner:
-            ref.update({
-                f"{guildid}/response": f'{str(response)}'
+            tag_ref.update({
+                "response": f'{str(response)}'
             })
             return await ctx.reply(f"**{tag_name}** was edited!")
         elif author == None:
