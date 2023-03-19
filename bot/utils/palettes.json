@@ -30,5 +30,15 @@
     ["#FFB7A1", "#EFBC68", "#919F89"],
     ["#E2A55E", "#5E718B", "#96AA9A", "#E5C5BD"],
     ["#D0C8B6", "#E6CDB5", "#E3DAD5"],
-    ["#E7D7C9", "#CDC6C3", "#A38F85"]
+    ["#E7D7C9", "#CDC6C3", "#A38F85"],
+    ["#FBF5F7", "#FFFFFF", "#EEEBED", "#F8F7F8", "#FEFBFC"],
+    ["#FFFAFA", "#F3EDED", "#CBC6F6", "#FDF6F6", "#DCD5D5"],
+    ["#c4d471", "#cfe9eo", "#ccdb98", "#f5bebb", "#fcfod6"],
+    ["#fffdf5", "#bbd0dc", "#afc0d4", "#dae0dd", "#c5d4dd"],
+    ["#fbe2e0", "#f9dcc7", "#e1acab", "#bfc8d9"],
+    ["#f7e6cd", "#e7ac98", "#eccabf", "#df8b92"],
+    ["#e6a6a7", "#cca1a1", "#896161"],
+    ["#d1e0e5", "#aac6c1", "#84b3bb", "#aba8c9", "#dedcb7"],
+    ["#bcdad8", "#ef9b9e", "#dcd0e0", "#f4d7d4", "#ecc7ad"],
+    ["#dde0cc", "#a6aca7", "#a3b8b1", "#b3c1b7"]
 ]
