@@ -63,7 +63,7 @@ class CommandErrorHandler(commands.Cog):
             embed = discord.Embed(title="Error", description=f"```py\nUser Not Found```\nI can't find that user!", color=self.color)
             await ctx.reply(embed=embed, mention_author=False)
 
-        elif isinstance(error, commands.UserNotFound):
+        elif isinstance(error, commands.MemberNotFound):
             embed = discord.Embed(title="Error", description=f"```py\nMember Not Found```\nI can't find that member!", color=self.color)
             await ctx.reply(embed=embed, mention_author=False)
 
