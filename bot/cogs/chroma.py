@@ -10,6 +10,7 @@ from firebase_admin import db
 from firebase_admin import credentials
 from urllib.parse import quote_plus
 from utils.subclasses import Context
+from typing import Optional
 
 cred2 = credentials.Certificate(second_config)
 secondaryApp = firebase_admin.initialize_app(cred2, {
@@ -41,7 +42,13 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
 
     @commands.command(aliases=["upl"], hidden=True)
     async def upload(self, ctx: Context, username: str):
-        """Adds edit to edits command"""
+        """Adds edit to edits command
+
+        Parameters
+        -----------
+        username: str
+            your instagram username
+        """
         stored_guild_id = 694010548605550675
         if ctx.guild.id == stored_guild_id:
             if ctx.message.attachments:
@@ -71,8 +78,14 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
         await ctx.send(f'hi {name}! i hope ur having a great day ily<3')
 
     @commands.command()
-    async def memberinfo(self, ctx: Context, user: discord.Member = None):
-        """Sends info about a member"""
+    async def memberinfo(self, ctx: Context, user: Optional[discord.Member] = None):
+        """Sends info about a member
+        
+        Parameters
+        -----------
+        user: discord.Member, optional
+            the user to get info on
+        """
         stored_guild_id = 694010548605550675
         if user == None:
             user = ctx.author

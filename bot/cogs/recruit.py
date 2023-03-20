@@ -75,7 +75,13 @@ class Recruit(commands.Cog):
     @commands.command(name="rc")
     @is_staff()
     async def recruit_check(self, ctx: Context, user: discord.User):
-        """Check if a user has been accepted"""
+        """Check if a user has been accepted
+        
+        Parameters
+        -----------
+        user: discord.User
+            the user to check
+        """
         async with self.bot.db.cursor() as cursor:
             await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (user.id,))
             result = await cursor.fetchone()
@@ -111,7 +117,13 @@ class Recruit(commands.Cog):
     @commands.command(name="da")
     @is_staff()
     async def delete_app(self, ctx: Context, member: discord.Member):
-        """Delete an application"""
+        """Delete an application
+        
+        Parameters
+        -----------
+        member: discord.Member
+            whose application to delete
+        """
         async with self.bot.db.cursor() as cursor:
             await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (member.id,))
             result = await cursor.fetchone()
@@ -126,7 +138,13 @@ class Recruit(commands.Cog):
     @commands.command(name="appinfo")
     @is_staff()
     async def appinfo(self, ctx: Context, member: Union[discord.Member, str]):
-        """Get information on an app"""
+        """Get information on an app
+        
+        Parameters
+        -----------
+        member
+            the member/instagram username of the person whose app you want information on
+        """
         if isinstance(member, discord.Member):
             async with self.bot.db.cursor() as cursor:
                 await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (member.id,))

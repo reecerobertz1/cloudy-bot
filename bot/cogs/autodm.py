@@ -8,8 +8,15 @@ class autodm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
-    @commands.command()
+    @commands.command(hidden=True)
     async def answer(self, ctx: Context, *, response: str):
+        """Answer a Q&A question in the Chroma Communtiy guild
+        
+        Parameters
+        -----------
+        response: str
+            your answer to the question
+        """
         msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
         channel = self.bot.get_channel(862617899356651531)
         if "^" in msg.content:
@@ -26,6 +33,13 @@ class autodm(commands.Cog):
 
     @commands.command()
     async def qna(self, ctx: Context, *, question: str):
+        """Ask a question in the Chroma Community guild
+        
+        Parameters
+        -----------
+        question: str
+            your question
+        """
         channel = self.bot.get_channel(862615059355271188)         
         q = await ctx.reply("asked!")
         await channel.send(f"{question} ^ {ctx.author.id}")
@@ -33,9 +47,16 @@ class autodm(commands.Cog):
         await ctx.message.delete()
         await q.delete()  
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.has_role('staff')
     async def membercheck(self, ctx: Context, username: str):
+        """Checks if a user used to be in Chroma
+        
+        Parameters
+        -----------
+        username: str
+            the instagram username to check
+        """
         message = ctx.message
         if username in oldmems:
             await message.add_reaction('✅')

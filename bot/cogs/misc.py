@@ -96,7 +96,13 @@ class Misc(commands.Cog, name="Misc"):
 
     @commands.command()
     async def device(self, ctx: Context, member: Optional[discord.Member]):
-        """Gets a users current device(s)"""
+        """Check what device(s) is currently being used
+
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the person to check
+        """
         if not member:
             member = ctx.author
         devices = {}
@@ -152,8 +158,14 @@ class Misc(commands.Cog, name="Misc"):
         await message.edit(embed=embed)
 
     @commands.command(help="Sends info about a user", aliases=['ui'])
-    async def userinfo(self, ctx: Context, member: discord.Member=None):
-        """Get info about a user"""
+    async def userinfo(self, ctx: Context, member: Optional[discord.Member]=None):
+        """Get info about a discord user
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the user to get info on
+        """
         if member == None:
             member = ctx.author
         createdat = member.created_at
@@ -188,8 +200,14 @@ class Misc(commands.Cog, name="Misc"):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['act'])
-    async def activity(self, ctx: Context, member: Optional[discord.Member]):
-        """Sends activity status"""
+    async def activity(self, ctx: Context, member: Optional[discord.Member]=None):
+        """Sends activity status
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the member to get activity status for
+        """
         if not member:
             member = ctx.author
         data = await self.get_user_data(member.id)
@@ -211,7 +229,13 @@ class Misc(commands.Cog, name="Misc"):
 
     @commands.command()
     async def afk(self, ctx: Context, *, reason: str):
-        """Set an afk reason when you go afk"""
+        """Set an afk reason when you go afk
+        
+        Parameters
+        -----------
+        reason: str
+            the reason why you're going to be afk
+        """
         await self.set_afk(ctx.author.id, reason)
         await ctx.reply(f"✅ Successfully set your afk reason to *{reason}*!")
 

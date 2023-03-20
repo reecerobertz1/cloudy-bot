@@ -73,7 +73,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def spotify(self, ctx: Context, member: Optional[discord.Member]):
-        """Get a Spotify Card for the song currently playing"""
+        """Get a spotify card for the song currently playing
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the member to get spotify activity from
+        """
         async with ctx.typing():
             if not member:
                 member = ctx.author
@@ -90,7 +96,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def hug(self, ctx: Context, member: typing.Optional[discord.Member]):
-        """Hug your friends or have Cloudy give you a hug"""
+        """Hug your friends or have Cloudy give you a hug
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the friend you wanna hug
+        """
         author = ctx.message.author.mention
         if member == None:
             await ctx.send(f"Cloudy gave {author} a hug <:bearhug:800042518477013053>")
@@ -102,7 +114,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def hbd(self, ctx: Context, member: typing.Optional[discord.Member]):
-        """Wish your friends a happy birthday or have Cloudy wish you a hbd"""
+        """Wish your friends a happy birthday or have Cloudy wish you a hbd
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the birthday kid
+        """
         author = ctx.message.author
         if member == None:
             await ctx.send(f"Cloudy wishes {author.mention} a happy birthday! <:cake:804020293416517672>")
@@ -111,7 +129,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     
     @commands.command()
     async def kiss(self, ctx: Context, member: typing.Optional[discord.Member]):
-        """Kiss the homies good night or get a kiss from Cloudy"""
+        """Kiss the homies good night or get a kiss from Cloudy
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            your lover (or the friend you secretly wanna kiss)
+        """
         author = ctx.message.author.mention
         kiss = self.bot.get_emoji(804022318992719922)
         if member == None:
@@ -124,7 +148,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def slap(self, ctx: Context, member: typing.Optional[discord.Member]):
-        """Slap your archnemesis...or make Cloudy slap you"""
+        """Slap your archnemesis...or make Cloudy slap you
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the person to slap
+        """
         author = ctx.message.author.mention
         if member == None:
             await ctx.reply(f"Cloudy slapped {author}! sorry!!!!")
@@ -135,7 +165,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     
     @commands.command()
     async def ship(self, ctx: Context, *, ship: str):
-        """Cloudy will tell you whether they love your favorite ship or not"""
+        """Cloudy will tell you whether they love your favorite ship or not
+        
+        Parameters
+        -----------
+        ship: str
+            the shipname/people you ship
+        """
         choices = ["I ship", "I don't ship"]
         message = await ctx.send("{} {}!" .format(random.choice(choices), ship))
         if "don't" in message.content:
@@ -144,8 +180,17 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
             await message.add_reaction('💞')
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def dm(self, ctx: Context, member: typing.Optional[discord.Member], *, message: str):
-        """Send a DM to someone via Cloudy, or get Cloudy to DM you"""
+        """Send a DM to someone via Cloudy, or get Cloudy to DM you
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            who you want to message
+        message: str
+            the message you want to send
+        """
         try:
             if member == None:
                 ctx.author.send(message)
@@ -158,7 +203,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def embed(self, ctx: Context, *, message:str):
-        """Cloudy sends your message, but in an embed"""
+        """Cloudy sends your message, but in an embed
+        
+        Parameters
+        -----------
+        message: str
+            the message to embed
+        """
         colors = [0x99e9ff, 0xac58ed, 0xff7ab6, 0x7cf7a3, 0xf1ff94, 0x978aff]
         randomcolor = random.choice(colors) 
         embed = discord.Embed(title=f'{message}', colour=randomcolor)
@@ -189,12 +240,24 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def choose(self, ctx: Context, *choices: str):
-        """Hard to choose what you want for dinner? Cloudy will make a choice for you!"""
+        """Hard to choose what you want for dinner? Cloudy will make a choice for you!
+        
+        Parameters
+        -----------
+        choices: str
+            the options to choose from
+        """
         await ctx.reply(random.choice(choices))
 
     @commands.command(name='8ball', aliases=["8b", "b"])
     async def ball(self, ctx: Context, *, question: str):
-        """Tells you your faith or gives you advice, like all magic 8 balls do."""
+        """Tells you your faith or gives you advice, like all magic 8 balls do.
+        
+        Parameters
+        -----------
+        question: str
+            the question you need answered
+        """
         message = ctx.message
         options = ['It is certain.', 'It is decidedly so.', 'Without a doubt.', 'Yes, definitely.', 'You may rely on it.', 'As I see it, yes.', 'Most likely.', 'Outlook good.', 'Yes.', 'Signs point to yes.', 'Reply hazy, try again.', 'Ask again later.', 'Better not tell you now.', 'Cannot predict now.', 'Concentrate and ask again.', "Don't count on it.", 'My reply is no.', 'My sources say no.', 'Outlook not so good.', 'Very doubtful.']
         async with ctx.typing():
@@ -205,7 +268,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command(name='imgur', pass_context=True)
     async def imgur(self, ctx: Context, *text: str):
-        """Will search Imgur and return an image"""
+        """Will search Imgur and return an image
+        
+        Parameters
+        -----------
+        text: str
+            what to search imgur for
+        """
         rand = random.randint(0, 29)
         try:
             if text == ():
@@ -219,9 +288,15 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
                 
     
     @commands.group(invoke_without_command=True)
-    async def gif(self, ctx: Context, *, searchterm: typing.Optional[str]):
+    async def gif(self, ctx: Context, *, searchterm: typing.Optional[str] = None):
 
-        """Searches for a GIF on Giphy"""
+        """Searches for a GIF on Giphy
+        
+        Parameters
+        -----------
+        searchterm: str, optional
+            what you want to search for on giphy
+        """
 
         try:
 
@@ -249,7 +324,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     @gif.command()
     async def lite(self, ctx: Context, *, searchterm: str):
 
-        """Searches for GIFs on Giphy while fetching less GIFs than the regular command"""
+        """Searches for GIFs on Giphy while fetching less GIFs than the regular command
+        
+        Parameters
+        -----------
+        searchterm: str
+            what you want to search for on giphy
+        """
 
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://api.giphy.com/v1/gifs/search?api_key={giphy_api}&q={searchterm}&limit=25&offset=0&rating=g&lang=en") as api:
@@ -262,7 +343,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
     @gif.command()
     async def mini(self, ctx: Context, *, searchterm: str):
 
-        """Searches for GIFs on Giphy while fetching less GIFs than the regular and lite commands"""
+        """Searches for GIFs on Giphy while fetching less GIFs than the regular and lite commands
+        
+        Parameters
+        -----------
+        searchterm: str
+            what you want to search for on giphy
+        """
 
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://api.giphy.com/v1/gifs/search?api_key={giphy_api}&q={searchterm}&limit=25&offset=0&rating=g&lang=en") as api:
@@ -274,7 +361,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.group(invoke_without_command=True)
     async def clock(self, ctx: Context, *, place: str):
-        """Returns the current time in the specified place"""
+        """Returns the current time in the specified area
+        
+        Parameters
+        -----------
+        place: str
+            the area you want to know the time for
+        """
         try:
             text = place.replace(" ", "_")
             country_time_zone = pytz.timezone(text)

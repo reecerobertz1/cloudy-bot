@@ -166,11 +166,10 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
     async def getpalette(self, ctx: Context, image_source: Union[discord.Member, str]=None):
         """Generate a color palette from an image
 
-           Options:
-           - use an image link as image_source
-           - attach an image by uploading it
-           - use a member as image_source
-           - empty params will use avatar
+            Parameters
+            -----------
+            image_source
+                the image you want to get a palette from. Can be an image url, image attachment, a member to use their avatar or your own avatar if left empty.
         """
         async with ctx.typing():
             if image_source != None:

@@ -140,7 +140,13 @@ class Games(commands.Cog):
 
     @commands.command(aliases=['ttt'])
     async def tictactoe(self, ctx: commands.Context, player2: discord.Member):
-        """Play tictactoe"""
+        """Play tic-tac-toe
+        
+        Parameters
+        -----------
+        player2: discord.Member
+            who you want to play against
+        """
         if player2 == ctx.author:
             return await ctx.reply("You can't play yourself.")
         embed = discord.Embed(title="📥 Invitation", description=f"{ctx.author.mention} invited you to play tic-tac-toe!", color=0x2B2D31)

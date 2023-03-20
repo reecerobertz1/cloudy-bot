@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands
 import json
 from utils.subclasses import Context
+from typing import Optional
 
 class Administration(commands.Cog, name="Admin", description="Administrative commands for Chroma staff"):
     def __init__(self, bot):
         self.bot = bot
         
-    @commands.command(aliases=["invite"]) 
+    @commands.command(aliases=["invite"], hidden=True) 
     @commands.has_permissions(manage_guild=True)
     async def inv(self, ctx: Context):
         """Creates an invite to the current discord server"""
@@ -17,14 +18,26 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
     @commands.command(aliases=["echo"])
     @commands.has_permissions(manage_guild=True)
     async def say(self, ctx: Context, *, msg: str):
-        """Gets the bot to say whatever you want it to say"""
+        """Gets the bot to say whatever you want it to say
+        
+        Parameters
+        -----------
+        msg: str
+            what you want the bot to say
+        """
         await ctx.message.delete()
         await ctx.send("{}" .format(msg))
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def createembed(self, ctx: Context, channel: discord.TextChannel = None):
-        """Make a custom embed!"""
+    async def createembed(self, ctx: Context, channel: Optional[discord.TextChannel] = None):
+        """Make a custom embed!
+        
+        Parameters
+        -----------
+        channel: discord.TextChannel, optional
+            the channel to send the embed in
+        """
 
         if channel == None:
             channel = ctx.channel
@@ -74,7 +87,14 @@ class Administration(commands.Cog, name="Admin", description="Administrative com
 
     @commands.command()
     @commands.has_permissions(manage_messages = True)
-    async def newprefix(ctx: Context, prefix):
+    async def newprefix(ctx: Context, prefix: str):
+        """Change the bot's prefix
+        
+        Parameters
+        -----------
+        prefix: str
+            the new prefix
+        """
 
         with open("prefixes.json", "r") as f:
             prefixes = json.load(f)

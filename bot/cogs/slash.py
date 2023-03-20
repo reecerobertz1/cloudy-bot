@@ -59,6 +59,13 @@ class CommunityRecruits(commands.Cog, name="Recruit Commands"):
 	@app_commands.command(description="Get our logos")
 	@app_commands.guilds(discord.Object(id=694010548605550675))
 	async def logos(self, interaction: discord.Interaction, version: Literal["original", "newer"]):
+		"""Get our logos
+	
+        Parameters
+        -----------
+        version: {'original', 'newer'}
+            which logos to get
+        """
 		await interaction.response.defer(ephemeral=True)
 		channel = self.bot.get_channel(1069358104740900985)
 		if version == "original":
