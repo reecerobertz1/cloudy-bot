@@ -73,7 +73,7 @@ class HelpDropdown(discord.ui.Select):
         await interaction.edit_original_response(embed=embed)
 
 class myView(discord.ui.View):
-    def __init__(self, mapping, bot, context, init_embed, timeout: Optional[float] = 10.0):
+    def __init__(self, mapping, bot, context, init_embed, timeout: Optional[float] = 20.0):
         super().__init__(timeout=timeout)
         # Adds the dropdown to our view object.
         self.add_item(HelpDropdown(mapping, bot, context, init_embed))
@@ -127,15 +127,15 @@ class HelpCommand(commands.MinimalHelpCommand):
             indent_2 = " <:reply:1087336198932021258>"
             for argument in arguments:
                 if argument.required == True:
-                    description.append(f"`❗{argument.name}`\n {argument.description}")
+                    description.append(f"`❗{argument.name}`\n{argument.description}")
                 else:
                     if argument.default:
-                        description.append(f"`🫧 {argument.name}` → `defaults to {argument.default}`\n {argument.description}")
+                        description.append(f"`🫧 {argument.name}` → `defaults to {argument.default}`\n{argument.description}")
                     else:
-                        description.append(f"`🫧 {argument.name}`\n {argument.description}")
+                        description.append(f"`🫧 {argument.name}`\n{argument.description}")
             embed.add_field(name="Arguments", value="\n".join(description), inline=False)
+            embed.set_footer(text="🫧 optional  |❗required")
 
-        embed.set_footer(text="🫧 optional  |❗required")
         embed.set_thumbnail(url=self.context.bot.user.avatar.url)
 
         channel = self.get_destination()

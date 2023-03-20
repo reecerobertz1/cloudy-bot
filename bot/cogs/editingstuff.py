@@ -169,7 +169,7 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
             Parameters
             -----------
             image_source
-                the image you want to get a palette from. Can be an image url, image attachment, a member to use their avatar or your own avatar if left empty.
+                the image you want to get a palette from. the options are as follows: an image url, image attachment, a member to use their avatar or your own avatar if left empty.
         """
         async with ctx.typing():
             if image_source != None:
