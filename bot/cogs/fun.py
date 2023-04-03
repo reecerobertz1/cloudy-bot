@@ -17,8 +17,14 @@ from time import strftime, gmtime
 import functools
 from typing import Optional
 from utils.subclasses import Context
+from urllib.parse import quote_plus
 
 imgur = ImgurClient(imgur_id, imgur_secret)
+
+class SpotifyView(discord.ui.View):
+    def __init__(self, spotify_url: str):
+        super().__init__()
+        self.add_item(discord.ui.Button(emoji="<:spotify:1090609567639019611>", label='Listen on Spotify', url=spotify_url))
 
 class Fun(commands.Cog, name="Fun", description="Includes commands you can use for fun!"):
     def __init__(self, bot):
@@ -92,7 +98,7 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
             album.seek(0)
             spotify_card = functools.partial(self.spotify_card, member, album)
             card = await self.bot.loop.run_in_executor(None, spotify_card)
-            await ctx.send(file=discord.File(fp=card, filename="spotify.png"))
+            await ctx.send(file=discord.File(fp=card, filename="spotify.png"), view=SpotifyView(spotify.track_url))
 
     @commands.command()
     async def hug(self, ctx: Context, member: typing.Optional[discord.Member]):

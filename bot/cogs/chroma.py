@@ -1,22 +1,13 @@
 import discord
 from discord.ext import commands
 import random
-from firebase_admin import db
 from io import BytesIO
 import ftplib
 from setup.config import *
-import firebase_admin
-from firebase_admin import db
-from firebase_admin import credentials
 from urllib.parse import quote_plus
 from utils.subclasses import Context
 from typing import Optional
-
-cred2 = credentials.Certificate(second_config)
-secondaryApp = firebase_admin.initialize_app(cred2, {
-    'databaseURL' : dburl2,
-    'storageBucket' : storageURL2
-}, name="secondary")
+import asyncpg
 
 class DownloadView(discord.ui.View):
     def __init__(self, username: str):
@@ -29,15 +20,32 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
     def __init__(self, bot):
         self.bot = bot
 
-    def cog_unload(self) -> None:
-        firebase_admin.delete_app(secondaryApp)
+    """ def cog_unload(self) -> None:
+        firebase_admin.delete_app(secondaryApp) """
+    
+    async def add_username(self, username: str) -> bool:
+        query = "INSERT INTO edits (username) VALUES ($1)"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                try:
+                    await connection.execute(query, username)
+                except asyncpg.exceptions.UniqueViolationError:
+                    pass
+        await self.bot.pool.release(connection)
 
-    @commands.command(aliases=["edit"])
-    async def edits(self, ctx):
+    async def get_edit(self) -> str:
+        query = "SELECT username from edits"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                    data = await connection.fetch(query)
+        await self.bot.pool.release(connection)
+        choice = random.choice(data)
+        return choice["username"]
+    
+    @commands.command()
+    async def edits(self, ctx: Context):
         """Sends an edit made by a Chroma member"""
-        ref = db.reference("edits", app=secondaryApp)
-        edits = ref.get()
-        edit = random.choice(edits)
+        edit = await self.get_edit()
         await ctx.send("https://cloudy.rqinflow.com/" + edit, view=DownloadView(edit))
 
     @commands.command(aliases=["upl"], hidden=True)
@@ -57,17 +65,16 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
                 myfile.seek(0)
                 new_username = username + ".mp4"
                 if f.content_type == "video/mp4" or f.content_type == "video/quicktime":
-                    ref = db.reference("edits", app=secondaryApp)
-                    edits = ref.get()
-                    i = len(edits)
-                    ref.update({i: username})
                     session = ftplib.FTP(ftp_host,ftp_username,ftp_password)
                     session.storbinary(f'STOR {new_username}', myfile)
                     session.close()
+                    await self.add_username(username=username)
                     await ctx.send(f"Succesfully uploaded the edit!")
                     await ctx.send(f"https://cloudy.rqinflow.com/{username}")
                 else:
                     await ctx.send(f"Your file is in the {f.content_type} format, and it needs to be video/mp4 or video/quicktime")
+            else:
+                await ctx.send("Please provide an attachment of your edit along with your username!")
         else:
             await ctx.send("This command can only be used in the private Chroma server.")
 

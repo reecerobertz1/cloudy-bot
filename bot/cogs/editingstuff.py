@@ -16,16 +16,6 @@ from utils.subclasses import Context
 class Editingstuff(commands.Cog, name="Editing", description="Includes the commands you would wanna use for editing!"):
     def __init__(self, bot):
         self.bot = bot
-
-    def reg_palette(self) -> BytesIO:
-        ranpal = random.choice(palettes)
-        palette = sns.color_palette(ranpal, 5)
-        buffer = BytesIO()
-        sns.palplot(palette)
-        plt.axis('off')
-        plt.savefig(buffer, format="png", bbox_inches="tight", transparent=True)
-        buffer.seek(0)
-        return buffer
     
     def gen_palette(self) -> BytesIO:
         with open("utils/palettes.json", "r") as f:
