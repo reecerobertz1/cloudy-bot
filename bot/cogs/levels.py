@@ -308,6 +308,7 @@ class Levels(commands.Cog):
     @commands.group(invoke_without_command=True)
     @chroma_command()
     async def rank(self, ctx: commands.Context, member: Optional[discord.Member]):
+        """Sends your rank as a card"""
         if not member:
             member = ctx.author
         data = await self.get_member(member.id, ctx.guild.id)
@@ -319,6 +320,13 @@ class Levels(commands.Cog):
     @rank.command()
     @chroma_command()
     async def color(self, ctx: commands.Context, color: str):
+        """Change the color of your rank-card
+
+        Parameters
+        -----------
+        color: str
+            the hex color for you rank-card
+        """
         match = re.search(self.regex_hex, color)
         if match:
             await self.change_color(color, ctx.author.id, ctx.guild.id)
@@ -329,6 +337,13 @@ class Levels(commands.Cog):
     @rank.command()
     @private_only()
     async def image(self, ctx: commands.Context, link: Optional[str]):
+        """Change the background image of your rank-card
+
+        Parameters
+        -----------
+        link: str, optional
+            link to an image to use as your background image
+        """
         if link:
             if link.startswith("https://") or link.startswith("http://"):
                 try:
@@ -356,6 +371,7 @@ class Levels(commands.Cog):
     @commands.command(aliases=['levels'])
     @chroma_command()
     async def leaderboard(self, ctx: commands.Context):
+        """Sends a link to the leaderboard"""
         view = discord.ui.View()
         button = discord.ui.Button(label="Click to see the leaderboard", style=discord.ButtonStyle.url, url=f"https://cloudy.rqinflow.com/levels/{ctx.guild.id}")
         view.add_item(button)
