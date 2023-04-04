@@ -18,6 +18,7 @@ class ActivityLevel(TypedDict):
     accent_color: str  
     card_image: str
     messages: int
+    bar_color: str
 
 class Inactivity(TypedDict):
     id: int
@@ -31,6 +32,9 @@ class Levels(commands.Cog):
         self.regex_hex = "^#(?:[0-9a-fA-F]{3}){1,2}$"
         self.guilds = [694010548605550675, 835495688832811039]
         self.counting_channels = [694010549532360726, 1070796927840559124, 1077569961289072701, 836647673595428925, 1005863199540793415]
+
+    class PosixLikeFlags(commands.FlagConverter, prefix='--', delimiter=' '):
+        colorchange: bool
 
     def private_only():
         def predicate(ctx):
@@ -116,24 +120,24 @@ class Levels(commands.Cog):
                 await connection.execute(query, color, member_id, guild_id)
         await self.bot.pool.release(connection)
 
-    async def set_card_image(self, image: BytesIO, member_id: int, guild_id: int) -> None:
-        query = "UPDATE levels SET card_image = $1 WHERE user_id = $2 AND guild_id = $3"
-        color = await self.get_color(member_id, guild_id)
+    async def set_card_image(self, image: BytesIO, member_id: int, guild_id: int, colorchange: bool) -> None:
+        query = "UPDATE levels SET card_image = $1, bar_color = $2 WHERE user_id = $3 AND guild_id = $4"
         bytes_data = image.getvalue()
-        if color != "#009efa":
+        image.seek(0)
+        ct = ColorThief(image)
+        pb_colors = ct.get_palette(2, 2)
+        pb_primary = '#%02x%02x%02x' % pb_colors[0]
+        pb_accent = '#%02x%02x%02x' % pb_colors[1]
+        if colorchange == False:
             async with self.bot.pool.acquire() as connection:
                 async with connection.transaction():
-                    await connection.execute(query, bytes_data, member_id, guild_id)
+                    await connection.execute(query, bytes_data, pb_primary, member_id, guild_id)
             await self.bot.pool.release(connection)
         else:
-            image.seek(0)
-            ct = ColorThief(image)
-            pb_colors = ct.get_palette(2, 2)
-            pb = '#%02x%02x%02x' % pb_colors[1]
-            new_query = "UPDATE levels SET card_image = $1, accent_color = $4 WHERE user_id = $2 AND guild_id = $3"
+            new_query = "UPDATE levels SET card_image = $1, accent_color = $4, bar_color = $5 WHERE user_id = $2 AND guild_id = $3"
             async with self.bot.pool.acquire() as connection:
                 async with connection.transaction():
-                    await connection.execute(new_query, bytes_data, member_id, guild_id, pb)
+                    await connection.execute(new_query, bytes_data, member_id, guild_id, pb_accent, pb_primary)
             await self.bot.pool.release(connection)
 
     def make_rank_card(self, member: discord.Member, rank: int, data: ActivityLevel) -> BytesIO:
@@ -165,11 +169,7 @@ class Levels(commands.Cog):
         card_right_shape = [(1000, 0), (1250, 500), (1500, 500), (1500, 0)]
 
         if data["card_image"]:
-            bg_bytes = BytesIO(data["card_image"])
-            b_img = Image.open(bg_bytes)
-            bg_bytes.seek(0)
-            ct = ColorThief(bg_bytes)
-            pb_color = ct.get_color(3)
+            b_img = Image.open(BytesIO(data["card_image"]))
             aspect_ratio = b_img.size[0] / b_img.size[1]
             if aspect_ratio > 3:
                 new_width = int(b_img.height * 3)
@@ -188,10 +188,7 @@ class Levels(commands.Cog):
         background.text((1225, 192), f"#{str(rank)}", font=poppins_big, color=data["accent_color"])
         background.paste(profile, (50, 50))
 
-        if pb_color:
-            background.rectangle((50, 367), width=1083, height=67, fill=pb_color, radius=33)
-        else:
-            background.rectangle((50, 367), width=1083, height=67, fill="#494b4f", radius=33)
+        background.rectangle((50, 367), width=1083, height=67, fill=data["bar_color"], radius=33)
         background.bar(
             (50, 367),
             max_width=1083,
@@ -394,7 +391,7 @@ class Levels(commands.Cog):
 
     @rank.command()
     @private_only()
-    async def image(self, ctx: commands.Context, link: Optional[str]):
+    async def image(self, ctx: commands.Context, link: Optional[str], flags: PosixLikeFlags):
         """Change the background image of your rank-card
 
         Parameters
@@ -429,7 +426,9 @@ class Levels(commands.Cog):
             b_img = Image.open(image)
         except UnidentifiedImageError:
             return await ctx.send("Invalid image.")
-        await self.set_card_image(image, ctx.author.id, ctx.guild.id)
+        if not flags.colorchange:
+            flags.colorchange == False
+        await self.set_card_image(image, ctx.author.id, ctx.guild.id, flags.colorchange)
         await ctx.reply("Succesfully changed your rank card image!")
 
     @commands.command(aliases=['levels'])
