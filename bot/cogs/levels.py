@@ -357,20 +357,21 @@ class Levels(commands.Cog):
         member: discord.Member, optional
             the member to check the rank for
         """
-        if not member:
-            member = ctx.author
-        data = await self.get_member(member.id, ctx.guild.id)
-        if data is not None:
-            rank = await self.get_rank(member.id, ctx.guild.id)
-            make_card = functools.partial(self.make_rank_card, member, rank, data)
-            card = await self.bot.loop.run_in_executor(None, make_card)
-            await ctx.send(file=discord.File(fp=card,filename="rankcard.png"))
-        else:
-            if member == ctx.author:
-                prn = "You have to "
+        async with ctx.typing():
+            if not member:
+                member = ctx.author
+            data = await self.get_member(member.id, ctx.guild.id)
+            if data is not None:
+                rank = await self.get_rank(member.id, ctx.guild.id)
+                make_card = functools.partial(self.make_rank_card, member, rank, data)
+                card = await self.bot.loop.run_in_executor(None, make_card)
+                await ctx.send(file=discord.File(fp=card,filename="rankcard.png"))
             else:
-                prn = member.display_name + " has to "
-            await ctx.send(f"{prn} send a message first!")
+                if member == ctx.author:
+                    prn = "You have to "
+                else:
+                    prn = member.display_name + " has to "
+                await ctx.send(f"{prn} send a message first!")
 
     @rank.command()
     @chroma_command()
@@ -399,44 +400,45 @@ class Levels(commands.Cog):
         link: str, optional
             link to an image to use as your background image
         """
-        if link:
-            if link.startswith("https://") or link.startswith("http://"):
-                try:
-                    async with self.bot.session.get(link) as resp:
-                        if resp.headers.get('content-type').split("/")[0] == "image" and not resp.headers.get('content-type').split("/")[1] == "gif":
-                            image = BytesIO(await resp.read())
-                            image.seek(0)
-                        else:
-                            return await ctx.send("Invalid image.")
-                except:
-                    return await ctx.send("Couldn't get the image from the link you provided.")
-            else:
-                return await ctx.send("You need to use a https or http URL")
-        else:
-            if ctx.message.attachments:
-                to_edit = ctx.message.attachments[0]
-                if to_edit.content_type.split("/")[0] == "image" and not to_edit.content_type.split("/")[1] == "gif":
-                    image = BytesIO(await to_edit.read())
-                    image.seek(0)
+        async with ctx.typing():
+            if link:
+                if link.startswith("https://") or link.startswith("http://"):
+                    try:
+                        async with self.bot.session.get(link) as resp:
+                            if resp.headers.get('content-type').split("/")[0] == "image" and not resp.headers.get('content-type').split("/")[1] == "gif":
+                                image = BytesIO(await resp.read())
+                                image.seek(0)
+                            else:
+                                return await ctx.send("Invalid image.")
+                    except:
+                        return await ctx.send("Couldn't get the image from the link you provided.")
                 else:
-                    return await ctx.send("Invalid image.")
+                    return await ctx.send("You need to use a https or http URL")
             else:
-                return ctx.send("You need to upload an image attachment or add an image url")
-        try:
-            b_img = Image.open(image)
-        except UnidentifiedImageError:
-            return await ctx.send("Invalid image.")
-        true = ["true", "True", True]
-        false = [False, "False", "false"]
-        if flags == None:
-            colorchange = False
-        else:
-            if flags.colorchange in true:
-                colorchange = True
-            elif flags.colorchange in false:
+                if ctx.message.attachments:
+                    to_edit = ctx.message.attachments[0]
+                    if to_edit.content_type.split("/")[0] == "image" and not to_edit.content_type.split("/")[1] == "gif":
+                        image = BytesIO(await to_edit.read())
+                        image.seek(0)
+                    else:
+                        return await ctx.send("Invalid image.")
+                else:
+                    return ctx.send("You need to upload an image attachment or add an image url")
+            try:
+                b_img = Image.open(image)
+            except UnidentifiedImageError:
+                return await ctx.send("Invalid image.")
+            true = ["true", "True", True]
+            false = [False, "False", "false"]
+            if flags == None:
                 colorchange = False
-        await self.set_card_image(image, ctx.author.id, ctx.guild.id, colorchange)
-        await ctx.reply("Succesfully changed your rank card image!")
+            else:
+                if flags.colorchange in true:
+                    colorchange = True
+                elif flags.colorchange in false:
+                    colorchange = False
+            await self.set_card_image(image, ctx.author.id, ctx.guild.id, colorchange)
+            await ctx.reply("Succesfully changed your rank card image!")
 
     @commands.command(aliases=['levels'])
     @chroma_command()
