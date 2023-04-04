@@ -426,9 +426,16 @@ class Levels(commands.Cog):
             b_img = Image.open(image)
         except UnidentifiedImageError:
             return await ctx.send("Invalid image.")
-        if not flags:
-            flags.colorchange == False
-        await self.set_card_image(image, ctx.author.id, ctx.guild.id, flags.colorchange)
+        if flags == None:
+            colorchange = False
+        else:
+            if flags.colorchange == "true":
+                colorchange = True
+            elif flags.colorchange == True | "True":
+                colorchange = True
+            elif flags.colorchange == False | "False" | "false":
+                colorchange = False
+        await self.set_card_image(image, ctx.author.id, ctx.guild.id, colorchange)
         await ctx.reply("Succesfully changed your rank card image!")
 
     @commands.command(aliases=['levels'])
