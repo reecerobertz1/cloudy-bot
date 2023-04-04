@@ -54,7 +54,7 @@ class Levels(commands.Cog):
         return commands.check(predicate)
 
     async def get_member(self, member_id: int, guild_id: int) -> Optional[ActivityLevel]:
-        query = "SELECT user_id, xp, accent_color, card_image, messages FROM levels WHERE user_id = $1 and guild_id = $2;"
+        query = "SELECT user_id, xp, accent_color, card_image, messages, bar_color FROM levels WHERE user_id = $1 and guild_id = $2;"
         async with self.bot.pool.acquire() as connection:
             async with connection.transaction():
                 row = await connection.fetchrow(query, member_id, guild_id)
