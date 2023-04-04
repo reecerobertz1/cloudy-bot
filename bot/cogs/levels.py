@@ -33,9 +33,6 @@ class Levels(commands.Cog):
         self.guilds = [694010548605550675, 835495688832811039]
         self.counting_channels = [694010549532360726, 1070796927840559124, 1077569961289072701, 836647673595428925, 1005863199540793415]
 
-    class PosixLikeFlags(commands.FlagConverter, prefix='--', delimiter=' '):
-        colorchange: bool
-
     def private_only():
         def predicate(ctx):
             if ctx.guild.id == 694010548605550675:
@@ -120,7 +117,7 @@ class Levels(commands.Cog):
                 await connection.execute(query, color, member_id, guild_id)
         await self.bot.pool.release(connection)
 
-    async def set_card_image(self, image: BytesIO, member_id: int, guild_id: int, colorchange: bool) -> None:
+    async def set_card_image(self, image: BytesIO, member_id: int, guild_id: int, colorchange: Optional[bool] = False) -> None:
         query = "UPDATE levels SET card_image = $1, bar_color = $2 WHERE user_id = $3 AND guild_id = $4"
         bytes_data = image.getvalue()
         image.seek(0)
@@ -392,7 +389,7 @@ class Levels(commands.Cog):
 
     @rank.command()
     @private_only()
-    async def image(self, ctx: commands.Context, link: Optional[str], *, flags: Optional[PosixLikeFlags]):
+    async def image(self, ctx: commands.Context, link: Optional[str], *, options: Optional[str]):
         """Change the background image of your rank-card
 
         Parameters
@@ -428,15 +425,8 @@ class Levels(commands.Cog):
                 b_img = Image.open(image)
             except UnidentifiedImageError:
                 return await ctx.send("Invalid image.")
-            true = ["true", "True", True]
-            false = [False, "False", "false"]
-            if flags == None:
-                colorchange = False
-            else:
-                if flags.colorchange in true:
-                    colorchange = True
-                elif flags.colorchange in false:
-                    colorchange = False
+            if "colorchange" in options:
+                colorchange=True
             await self.set_card_image(image, ctx.author.id, ctx.guild.id, colorchange)
             await ctx.reply("Succesfully changed your rank card image!")
 
