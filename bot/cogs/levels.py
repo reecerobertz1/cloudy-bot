@@ -55,6 +55,14 @@ class Levels(commands.Cog):
                 row = await connection.fetchrow(query, member_id, guild_id)
         await self.bot.pool.release(connection)
         return row
+    
+    async def get_color(self, member_id: int, guild_id: int) -> Optional[ActivityLevel]:
+        query = "SELECT accent_color FROM levels WHERE user_id = $1 and guild_id = $2;"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                color = await connection.fetchval(query, member_id, guild_id)
+        await self.bot.pool.release(connection)
+        return color
 
     async def add_member(self, member_id: int, guild_id: int, avatar: str, username: str) -> None:
         query = "INSERT INTO levels (user_id, guild_id, first_message, accent_color, card_image, messages, avatar_url, xp, username) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
@@ -109,11 +117,23 @@ class Levels(commands.Cog):
 
     async def set_card_image(self, image: BytesIO, member_id: int, guild_id: int) -> None:
         query = "UPDATE levels SET card_image = $1 WHERE user_id = $2 AND guild_id = $3"
+        color = await self.get_color(member_id, guild_id)
         bytes_data = image.getvalue()
-        async with self.bot.pool.acquire() as connection:
-            async with connection.transaction():
-                await connection.execute(query, bytes_data, member_id, guild_id)
-        await self.bot.pool.release(connection)
+        if color != "#009efa":
+            async with self.bot.pool.acquire() as connection:
+                async with connection.transaction():
+                    await connection.execute(query, bytes_data, member_id, guild_id)
+            await self.bot.pool.release(connection)
+        else:
+            image.seek(0)
+            ct = ColorThief(image)
+            pb_colors = ct.get_palette(2, 2)
+            pb = '#%02x%02x%02x' % pb_colors[1]
+            new_query = "UPDATE levels SET card_image = $1, accent_color = $4 WHERE user_id = $2 AND guild_id = $3"
+            async with self.bot.pool.acquire() as connection:
+                async with connection.transaction():
+                    await connection.execute(new_query, bytes_data, member_id, guild_id, pb)
+            await self.bot.pool.release(connection)
 
     def make_rank_card(self, member: discord.Member, rank: int, data: ActivityLevel) -> BytesIO:
 
@@ -144,7 +164,11 @@ class Levels(commands.Cog):
         card_right_shape = [(1000, 0), (1250, 500), (1500, 500), (1500, 0)]
 
         if data["card_image"]:
-            b_img = Image.open(BytesIO(data["card_image"]))
+            bg_bytes = BytesIO(data["card_image"])
+            b_img = Image.open(bg_bytes)
+            bg_bytes.seek(0)
+            ct = ColorThief(bg_bytes)
+            pb_color = ct.get_color(3)
             aspect_ratio = b_img.size[0] / b_img.size[1]
             if aspect_ratio > 3:
                 new_width = int(b_img.height * 3)
@@ -163,7 +187,10 @@ class Levels(commands.Cog):
         background.text((1225, 192), f"#{str(rank)}", font=poppins_big, color=data["accent_color"])
         background.paste(profile, (50, 50))
 
-        background.rectangle((50, 367), width=1083, height=67, fill="#494b4f", radius=33)
+        if pb_color:
+            background.rectangle((50, 367), width=1083, height=67, fill=pb_color, radius=33)
+        else:
+            background.rectangle((50, 367), width=1083, height=67, fill="#494b4f", radius=33)
         background.bar(
             (50, 367),
             max_width=1083,
