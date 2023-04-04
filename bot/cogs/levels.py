@@ -26,7 +26,7 @@ class Inactivity(TypedDict):
 class Levels(commands.Cog):
     def __init__(self, bot) -> None:
         self.bot = bot
-        self.cd_mapping = commands.CooldownMapping.from_cooldown(1, 2, commands.BucketType.user)
+        self.cd_mapping = commands.CooldownMapping.from_cooldown(1, 60, commands.BucketType.user)
         self.regex_hex = "^#(?:[0-9a-fA-F]{3}){1,2}$"
         self.guilds = [694010548605550675, 835495688832811039]
         self.counting_channels = [694010549532360726, 1070796927840559124, 1077569961289072701, 836647673595428925, 1005863199540793415]
@@ -147,8 +147,8 @@ class Levels(commands.Cog):
             b_img = Image.open(BytesIO(data["card_image"]))
             aspect_ratio = b_img.size[0] / b_img.size[1]
             if aspect_ratio > 3:
-                new_width = int(img.height * 3)
-                img = img.crop(((img.width - new_width) / 2, 0, (img.width + new_width) / 2, img.height))
+                new_width = int(b_img.height * 3)
+                b_img = b_img.crop(((b_img.width - new_width) / 2, 0, (b_img.width + new_width) / 2, b_img.height))
             elif aspect_ratio < 3:
                 new_height = int(b_img.width / 3)
                 b_img = b_img.crop((0, (b_img.height - new_height) / 2, b_img.width, (b_img.height + new_height) / 2))
@@ -163,7 +163,11 @@ class Levels(commands.Cog):
         background.text((1225, 192), f"#{str(rank)}", font=poppins_big, color=data["accent_color"])
         background.paste(profile, (50, 50))
 
-        background.rectangle((50, 367), width=1083, height=67, fill="#494b4f", radius=33)
+        col = int(data["accent_color"].replace("#", "0x"), base=16)
+        nw_col = (col & 0xfefefe) >> 1
+        fill_color = f'#{nw_col:x}'
+
+        background.rectangle((50, 367), width=1083, height=67, fill=fill_color, radius=33)
         background.bar(
             (50, 367),
             max_width=1083,
@@ -184,6 +188,23 @@ class Levels(commands.Cog):
         )
 
         return background.image_bytes
+
+    async def add_xp(self, member: discord.Member, xp: int, guild_id: int) -> None:
+        query = "UPDATE levels SET xp = xp + $1 WHERE user_id = $2 AND guild_id = $3"
+        async with self.bot.pool.acquire() as connection:
+            try:
+                async with connection.transaction():
+                    await connection.execute(query, xp, member.id, guild_id)
+            except Exception as e:
+                print(e)
+        await self.bot.pool.release(connection)
+
+    async def remove_xp(self, member: discord.Member, xp: int, guild_id: int) -> None:
+        query = "UPDATE levels SET xp = xp - $1 WHERE user_id = $2 AND guild_id = $3"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                await connection.execute(query, xp, member.id, guild_id)
+        await self.bot.pool.release(connection)
 
     async def check_member(self, member: discord.Member) -> bool:
         member_server: discord.Guild = self.bot.get_guild(694010548605550675)
@@ -308,10 +329,22 @@ class Levels(commands.Cog):
     @commands.group(invoke_without_command=True)
     @chroma_command()
     async def rank(self, ctx: commands.Context, member: Optional[discord.Member]):
-        """Sends your rank as a card"""
+        """Sends your rank as a card
+        
+        Parameters
+        -----------
+        member: discord.Member, optional
+            the member to check the rank for
+        """
         if not member:
             member = ctx.author
         data = await self.get_member(member.id, ctx.guild.id)
+        if data["xp"] == None:
+            if member == ctx.author:
+                prn = "You have to "
+            else:
+                prn = member.display_name + " has to "
+            await ctx.send(f"{prn} send a message first!")
         rank = await self.get_rank(member.id, ctx.guild.id)
         make_card = functools.partial(self.make_rank_card, member, rank, data)
         card = await self.bot.loop.run_in_executor(None, make_card)
@@ -330,7 +363,7 @@ class Levels(commands.Cog):
         match = re.search(self.regex_hex, color)
         if match:
             await self.change_color(color, ctx.author.id, ctx.guild.id)
-            await ctx.reply("Succesfully changed your rank card image!")
+            await ctx.reply("Succesfully changed your rank color!")
         else:
             await ctx.reply(f"`{color}` is not a valid hex color")
 
@@ -348,8 +381,11 @@ class Levels(commands.Cog):
             if link.startswith("https://") or link.startswith("http://"):
                 try:
                     async with self.bot.session.get(link) as resp:
-                        image = BytesIO(await resp.read())
-                        image.seek(0)
+                        if resp.headers.get('content-type').split("/")[0] == "image" and not resp.headers.get('content-type').split("/")[1] == "gif":
+                            image = BytesIO(await resp.read())
+                            image.seek(0)
+                        else:
+                            return await ctx.send("Invalid image.")
                 except:
                     return await ctx.send("Couldn't get the image from the link you provided.")
             else:
@@ -357,8 +393,11 @@ class Levels(commands.Cog):
         else:
             if ctx.message.attachments:
                 to_edit = ctx.message.attachments[0]
-                image = BytesIO(await to_edit.read())
-                image.seek(0)
+                if to_edit.content_type.split("/")[0] == "image" and not to_edit.content_type.split("/")[1] == "gif":
+                    image = BytesIO(await to_edit.read())
+                    image.seek(0)
+                else:
+                    return await ctx.send("Invalid image.")
             else:
                 return ctx.send("You need to upload an image attachment or add an image url")
         try:
@@ -376,6 +415,26 @@ class Levels(commands.Cog):
         button = discord.ui.Button(label="Click to see the leaderboard", style=discord.ButtonStyle.url, url=f"https://cloudy.rqinflow.com/levels/{ctx.guild.id}")
         view.add_item(button)
         await ctx.reply("Here you go! <:cuteface:756721125399986199>", view=view)
+
+    @commands.group()
+    @commands.has_role(753678720119603341)
+    async def add(self, ctx: commands.Context, member: discord.Member, xp: int):
+        try:
+            await self.add_xp(member, xp, ctx.guild.id)
+        except Exception as e:
+            embed = discord.Embed("Error!", description=f"`{e}`", color=0xe63241)
+            return await ctx.send(embed=embed)
+        await ctx.send(f"Succesfully added `{xp} xp` to {member.display_name}")
+
+    @commands.group()
+    @commands.has_role(753678720119603341)
+    async def remove(self, ctx: commands.Context, member: discord.Member, xp: int):
+        try:
+            await self.remove_xp(member, xp, ctx.guild.id)
+        except Exception as e:
+            embed = discord.Embed("Error!", description=f"`{e}`", color=0xe63241)
+            return await ctx.send(embed=embed)
+        await ctx.send(f"Succesfully removed `{xp} xp` from {member.display_name}")
 
     @discord.app_commands.command(name="inactivity")
     @discord.app_commands.guilds(discord.Object(id=694010548605550675))
