@@ -163,11 +163,7 @@ class Levels(commands.Cog):
         background.text((1225, 192), f"#{str(rank)}", font=poppins_big, color=data["accent_color"])
         background.paste(profile, (50, 50))
 
-        col = int(data["accent_color"].replace("#", "0x"), base=16)
-        nw_col = (col & 0xfefefe) >> 1
-        fill_color = f'#{nw_col:x}'
-
-        background.rectangle((50, 367), width=1083, height=67, fill=fill_color, radius=33)
+        background.rectangle((50, 367), width=1083, height=67, fill="#494b4f", radius=33)
         background.bar(
             (50, 367),
             max_width=1083,
@@ -226,7 +222,7 @@ class Levels(commands.Cog):
 
     async def public_level_handler(self, message: discord.Message, data: Union[ActivityLevel, None], xp_to_add: int, retry_after: Union[float, None]) -> None:
         if data == None: # author isn't in database so we add them
-            await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=200).url, message.author.name + "#" + message.author.discriminator)
+            await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=256).url, message.author.name + "#" + message.author.discriminator)
         else: # the author is in database so we just need to update their entry
             if retry_after: # they're on cooldown so we just update their message count
                 await self.update_messages(message.author.id, message.guild.id)
@@ -248,7 +244,7 @@ class Levels(commands.Cog):
                     # check if they leveled up
                     await self.level_check(message, data["xp"], xp_to_add)
             elif data is not None: # member has public levels only so we need to add private levels
-                await self.add_member(message.author.id, 694010548605550675, message.author.display_avatar.replace(static_format='png', size=200).url, message.author.name + "#" + message.author.discriminator)
+                await self.add_member(message.author.id, 694010548605550675, message.author.display_avatar.replace(static_format='png', size=256).url, message.author.name + "#" + message.author.discriminator)
                 # update levels, but only public because we added private xp while registering
                 if retry_after:
                     await self.update_messages(member_id=message.author.id, guild_id=message.guild.id)
@@ -257,7 +253,7 @@ class Levels(commands.Cog):
                     # check if they leveled up
                     await self.level_check(message, data["xp"], xp_to_add)
             elif member_data is not None: # member has private levels only so we need to add public levels
-                await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=200).url, message.author.name + "#" + message.author.discriminator)
+                await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=256).url, message.author.name + "#" + message.author.discriminator)
                 # update levels, but only private because we added public xp while registering
                 if retry_after:
                     await self.update_messages(member_id=message.author.id, guild_id=694010548605550675)
@@ -268,8 +264,8 @@ class Levels(commands.Cog):
                     # just be very confusing to mention here 
                     await self.update_levels(message.author.id, 694010548605550675, data, xp_to_add)
         else: # member hasn't been registered yet
-            await self.add_member(message.author.id, 694010548605550675, message.author.display_avatar.replace(static_format='png', size=200).url, message.author.name + "#" + message.author.discriminator)
-            await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=200).url, message.author.name + "#" + message.author.discriminator)
+            await self.add_member(message.author.id, 694010548605550675, message.author.display_avatar.replace(static_format='png', size=256).url, message.author.name + "#" + message.author.discriminator)
+            await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=256).url, message.author.name + "#" + message.author.discriminator)
 
     async def private_level_handler(self, message: discord.Message, data: Union[ActivityLevel, None], retry_after: Union[float, None], xp_to_add: int) -> None:
         if data is not None: # member is registered in levels
@@ -280,7 +276,7 @@ class Levels(commands.Cog):
                 # check if they leveled up
                 await self.level_check(message, data["xp"], xp_to_add)
         else: # member hasn't been registered yet
-            await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=200).url, message.author.name + "#" + message.author.discriminator)
+            await self.add_member(message.author.id, message.guild.id, message.author.display_avatar.replace(static_format='png', size=256).url, message.author.name + "#" + message.author.discriminator)
 
     async def handle_message(self, message: discord.Message):
 
