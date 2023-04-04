@@ -134,7 +134,7 @@ class Levels(commands.Cog):
         if percentage < 1:
             percentage = 0
 
-        profile_image = load_image(str(member.display_avatar.replace(static_format='png', size=200).url))
+        profile_image = load_image(str(member.display_avatar.replace(static_format='png', size=256).url))
         profile = Editor(profile_image).resize((250, 250)).circle_image()
     
         poppins_big = Font.poppins(size=117)
