@@ -389,7 +389,7 @@ class Levels(commands.Cog):
 
     @rank.command()
     @private_only()
-    async def image(self, ctx: commands.Context, link: Optional[str], *, options: Optional[str]):
+    async def image(self, ctx: commands.Context, link: Optional[str], option: Optional[int]):
         """Change the background image of your rank-card
 
         Parameters
@@ -398,6 +398,7 @@ class Levels(commands.Cog):
             link to an image to use as your background image
         """
         async with ctx.typing():
+            colorchange = False
             if link:
                 if link.startswith("https://") or link.startswith("http://"):
                     try:
@@ -425,8 +426,9 @@ class Levels(commands.Cog):
                 b_img = Image.open(image)
             except UnidentifiedImageError:
                 return await ctx.send("Invalid image.")
-            if "colorchange" in options:
-                colorchange=True
+            if option != None:
+                if option == 1:
+                    colorchange=True
             await self.set_card_image(image, ctx.author.id, ctx.guild.id, colorchange)
             await ctx.reply("Succesfully changed your rank card image!")
 
