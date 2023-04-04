@@ -391,7 +391,7 @@ class Levels(commands.Cog):
 
     @rank.command()
     @private_only()
-    async def image(self, ctx: commands.Context, flags: Optional[PosixLikeFlags], link: Optional[str]):
+    async def image(self, ctx: commands.Context, link: Optional[str], *, flags: Optional[PosixLikeFlags]):
         """Change the background image of your rank-card
 
         Parameters
