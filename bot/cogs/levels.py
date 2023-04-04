@@ -9,6 +9,7 @@ import re
 import datetime
 from PIL import Image, ImageEnhance, ImageFilter, UnidentifiedImageError
 from setup.config import *
+from colorthief import ColorThief
 
 class ActivityLevel(TypedDict):
     user_id: int
@@ -362,16 +363,17 @@ class Levels(commands.Cog):
         if not member:
             member = ctx.author
         data = await self.get_member(member.id, ctx.guild.id)
-        if data["xp"] == None:
+        if data is not None:
+            rank = await self.get_rank(member.id, ctx.guild.id)
+            make_card = functools.partial(self.make_rank_card, member, rank, data)
+            card = await self.bot.loop.run_in_executor(None, make_card)
+            await ctx.send(file=discord.File(fp=card,filename="rankcard.png"))
+        else:
             if member == ctx.author:
                 prn = "You have to "
             else:
                 prn = member.display_name + " has to "
             await ctx.send(f"{prn} send a message first!")
-        rank = await self.get_rank(member.id, ctx.guild.id)
-        make_card = functools.partial(self.make_rank_card, member, rank, data)
-        card = await self.bot.loop.run_in_executor(None, make_card)
-        await ctx.send(file=discord.File(fp=card,filename="rankcard.png"))
 
     @rank.command()
     @chroma_command()
