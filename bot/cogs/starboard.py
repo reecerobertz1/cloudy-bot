@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, tasks
 from utils.subclasses import CloudyBot, Context
 import asyncpg
-from setup.config import starboard_channel_id, chroma_guild_id
 from typing import Optional
 import re
 
@@ -11,6 +10,8 @@ class Starboard(commands.Cog):
         self.bot: CloudyBot = bot
         self._message_cache: dict[int, discord.Message] = {}
         self.spoiler_regex = re.compile(r'\|\|(.+?)\|\|')
+        self.starboard_channel_id = 1090249213188784138
+        self.chroma_guild_id = 694010548605550675
 
     def find_spoiler_urls(self, text: str, url: str) -> bool:
         spoilers = self.spoiler_regex.findall(text)
@@ -96,7 +97,7 @@ class Starboard(commands.Cog):
             return
         
         # if this isn't in the chroma server we don't want to act on it either
-        if payload.guild_id != chroma_guild_id:
+        if payload.guild_id != self.chroma_guild_id:
             return
         
         guild = self.bot.get_guild(payload.guild_id)
@@ -113,7 +114,7 @@ class Starboard(commands.Cog):
         
         # gets the member that reacted
         # this is needed for the starrers table
-        reacter = await self.bot.fetch_or_get_member(guild, payload.user_id) 
+        reacter = await self.fetch_or_get_member(guild, payload.user_id) 
         
         row = await self.get_star_entry(message_id=payload.message_id)
         if row is None: # message has not been starred before
@@ -141,7 +142,7 @@ class Starboard(commands.Cog):
                 query2 = "SELECT COUNT(*) AS count FROM starrers WHERE entry_id = $1"
                 reactions = await connection.fetchval(query2, row["id"])
             if reactions >= 5:
-                starboard_channel = guild.get_channel(starboard_channel_id)
+                starboard_channel = guild.get_channel(self.starboard_channel_id)
                 try: # embed message already exists, let's update the reaction count
                     embed_message_id = row["star_embed_message_id"]
                     embed_msg = await self.get_message(starboard_channel, embed_message_id)
@@ -171,7 +172,7 @@ class Starboard(commands.Cog):
         if not message:
             return
         
-        reacter = await self.bot.fetch_or_get_member(guild, payload.user_id) 
+        reacter = await self.fetch_or_get_member(guild, payload.user_id) 
         
         row = await self.get_star_entry(message_id=payload.message_id)
         if row is None:
@@ -187,7 +188,7 @@ class Starboard(commands.Cog):
             reactions -= 1 # we are about to remove a starrer so we need to get reactions - 1
             if reactions < 5:
                 try: # embed message exists, but reactions are now less than 5 so let's delete the message.
-                    starboard_channel = guild.get_channel(starboard_channel_id)
+                    starboard_channel = guild.get_channel(self.starboard_channel_id)
                     embed_message_id = row["star_embed_message_id"]
                     embed_msg = await self.get_message(starboard_channel, embed_message_id)
                     await embed_msg.delete()
@@ -199,6 +200,15 @@ class Starboard(commands.Cog):
                 query = "DELETE FROM starrers WHERE entry_id = $1 AND author_id = $2"
                 await connection.execute(query, row["id"], reacter.id)
     
+    async def fetch_or_get_member(self, guild: discord.Guild, member_id: int) -> Optional[discord.Member]:
+        member = guild.get_member(member_id)
+        if not member:
+            try:
+                member = await guild.fetch_member(member_id)
+            except discord.HTTPException:
+                return None
+        return member
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         await self.handle_star(payload=payload)
@@ -211,7 +221,7 @@ class Starboard(commands.Cog):
     async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent) -> None:
         # this checks if a starboard message was deleted
         # if that is the case it'll delete the entry
-        if not payload.guild_id == chroma_guild_id:
+        if not payload.guild_id == self.chroma_guild_id:
             return
         message = await self.get_star_entry(payload.message_id)
         if message:
