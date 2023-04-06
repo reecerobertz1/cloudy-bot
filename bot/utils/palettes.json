@@ -56,5 +56,21 @@
     ["#fbe2e0", "#f9dcc7", "#e1acab", "#bfc8d9", "#9db6d9"],
     ["#fffdf6", "#cce2dc", "#cdc8d3", "#e3aeae", "#e7cba7"],
     ["#fffdf6", "#e8dee4", "#c0d6c5", "#aacad8", "#e5cdb8"],
-    ["#fffbf7", "#ebe0d0", "#c8b0a3", "#ae685f"]
+    ["#fffbf7", "#ebe0d0", "#c8b0a3", "#ae685f"],
+    ["#FFACAC", "#FFBFA9", "#FFEBB4", "#FBFFB1"],
+    ["#b7bec4", "#e8d3a4", "#c8baad", "#e3e9e9", "#d3c3a1"],
+    ["#d1e6d7", "#b7d1c8", "#9ec0bb", "#84afad", "#6b9d9b"],
+    ["#f3f9fc", "#c8d7e3", "#96a4ae", "#626d77", "#384654"],
+    ["#ffb6c1", "#ffa07a", "#ff7f50", "#ff5733", "#ffc300"],
+    ["#f5ecec", "#a5b6c4", "#d4d4dc", "#8f8f8f", "#b2c9ab"],
+    ["#AAD0D9", "#F7F7F7", "#EED5D1", "#E2B9B6"],
+    ["#D77FA1", "#E6B2C6", "#FEF6FB", "#D6E5FA"],
+    ["#FDF4F5", "#E8A0BF", "#BA90C6", "#C0DBEA"],
+    ["#B2A4FF", "#FFB4B4", "#FFDEB4", "#FDF7C3"],
+    ["#CCD5AE", "#E9EDC9", "#FEFAE0", "#FAEDCD"],
+    ["#1d2743", "#2e7ca2", "#5a9fbe", "#b9d9c4", "#f0f6e6"],
+    ["#FC8585", "#FFC86D", "#FBDBA2", "#F6EADB", "#85CBD9"],
+    ["#C9A5B6", "#838EA8", "#C1DBD1", "#FCF2E0", "#F2CAAA"],
+    ["#C5D9AB", "#FEEEB9", "#FFCC9C", "#E6AFC3", "#B199BF"],
+    ["#524466", "#5D8F8D", "#E2D4AC", "#BD9B6A", "#875049"]
 ]
