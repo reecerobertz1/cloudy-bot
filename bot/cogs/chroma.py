@@ -42,7 +42,7 @@ class Chroma(commands.Cog, name="Chroma", description="Includes the commands ass
         choice = random.choice(data)
         return choice["username"]
     
-    @commands.command()
+    @commands.command(aliases=["edit"])
     async def edits(self, ctx: Context):
         """Sends an edit made by a Chroma member"""
         edit = await self.get_edit()
