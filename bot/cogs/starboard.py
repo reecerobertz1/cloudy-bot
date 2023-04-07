@@ -112,6 +112,9 @@ class Starboard(commands.Cog):
         if not message:
             return # message wasn't found
         
+        if message.author.bot is True:
+            return # we don't want bot messages to get sent in the starboard
+        
         # gets the member that reacted
         # this is needed for the starrers table
         reacter = await self.fetch_or_get_member(guild, payload.user_id) 
