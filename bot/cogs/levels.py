@@ -66,11 +66,11 @@ class Levels(commands.Cog):
         await self.bot.pool.release(connection)
         return color
 
-    async def add_member(self, member_id: int, guild_id: int, avatar: str, username: str) -> None:
+    async def add_member(self, member_id: int, guild_id: int, avatar: str, username: str, xp: int = 25) -> None:
         query = "INSERT INTO levels (user_id, guild_id, first_message, accent_color, card_image, messages, avatar_url, xp, username) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
         async with self.bot.pool.acquire() as connection:
             async with connection.transaction():
-                await connection.execute(query, member_id, guild_id, discord.utils.utcnow(), "#009efa", None, 1, avatar, 25, username)
+                await connection.execute(query, member_id, guild_id, discord.utils.utcnow(), "#009efa", None, 1, avatar, xp, username)
         await self.bot.pool.release(connection)
 
     async def update_levels(self, member_id: int, guild_id: int, old_data: ActivityLevel, xp: int) -> None:
@@ -441,19 +441,33 @@ class Levels(commands.Cog):
         view.add_item(button)
         await ctx.reply("Here you go! <:cuteface:756721125399986199>", view=view)
 
-    @commands.group()
+    @commands.command(hidden=True)
     @commands.has_role(753678720119603341)
     async def add(self, ctx: commands.Context, member: discord.Member, xp: int):
-        try:
+        """Adds xp to a member's levels"""
+        mem = await self.get_member(member.id, ctx.guild.id)
+        if mem is not None:
             await self.add_xp(member, xp, ctx.guild.id)
-        except Exception as e:
-            embed = discord.Embed("Error!", description=f"`{e}`", color=0xe63241)
-            return await ctx.send(embed=embed)
-        await ctx.send(f"Succesfully added `{xp} xp` to {member.display_name}")
+            await ctx.send(f"Succesfully added `{xp} xp` to {member.display_name}")
+        else:
+            await self.add_member(member.id, ctx.guild.id, member.display_avatar.replace(static_format='png', size=256).url, member.name + "#" + member.discriminator, xp)
 
-    @commands.group()
+    @commands.command(hidden=True)
+    @commands.has_role(753678720119603341)
+    async def multiadd(self, ctx: commands.Context, members: commands.Greedy[discord.Member], *, xp: int):
+        """Adds xp to several members' levels"""
+        for member in members:
+            mem = await self.get_member(member.id, ctx.guild.id)
+            if mem is not None:
+                await self.add_xp(member, xp, ctx.guild.id)
+                await ctx.send(f"Succesfully added `{xp} xp` to {member.display_name}")
+            else:
+                await self.add_member(member.id, ctx.guild.id, member.display_avatar.replace(static_format='png', size=256).url, member.name + "#" + member.discriminator, xp)
+
+    @commands.command(hidden=True)
     @commands.has_role(753678720119603341)
     async def remove(self, ctx: commands.Context, member: discord.Member, xp: int):
+        """Removes xp from a member's levels"""
         try:
             await self.remove_xp(member, xp, ctx.guild.id)
         except Exception as e:
