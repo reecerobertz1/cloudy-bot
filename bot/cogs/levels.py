@@ -456,13 +456,16 @@ class Levels(commands.Cog):
     @commands.has_role(753678720119603341)
     async def multiadd(self, ctx: commands.Context, members: commands.Greedy[discord.Member], *, xp: int):
         """Adds xp to several members' levels"""
-        for member in members:
-            mem = await self.get_member(member.id, ctx.guild.id)
-            if mem is not None:
-                await self.add_xp(member, xp, ctx.guild.id)
-                await ctx.send(f"Succesfully added `{xp} xp` to {member.display_name}")
-            else:
-                await self.add_member(member.id, ctx.guild.id, member.display_avatar.replace(static_format='png', size=256).url, member.name + "#" + member.discriminator, xp)
+        async with ctx.typing():
+            member_names = []
+            for member in members:
+                member_names.append(member.display_name)
+                mem = await self.get_member(member.id, ctx.guild.id)
+                if mem is not None:
+                    await self.add_xp(member, xp, ctx.guild.id)
+                else:
+                    await self.add_member(member.id, ctx.guild.id, member.display_avatar.replace(static_format='png', size=256).url, member.name + "#" + member.discriminator, xp)
+            await ctx.send(f"Succesfully added `{xp}xp` to {', '.join(member_names)}")
 
     @commands.command(hidden=True)
     @commands.has_role(753678720119603341)
