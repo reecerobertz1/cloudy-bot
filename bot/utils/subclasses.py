@@ -45,7 +45,6 @@ class CloudyBot(commands.Bot):
             "cogs.editingstuff",
             "cogs.events",
             "cogs.fun",
-            "cogs.tags",
             "cogs.help",
             "jishaku",
             "cogs.error_handler",
