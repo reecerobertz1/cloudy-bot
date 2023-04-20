@@ -2,8 +2,11 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import traceback
-from typing import Literal
 from setup.config import *
+from typing import Optional
+from io import BytesIO
+
+# Modals
 
 class Recruit(discord.ui.Modal, title="Chroma Recruit"):
 	instagram = discord.ui.TextInput(label="Instagram Username", placeholder="Put username here...")
@@ -40,9 +43,86 @@ class Recruit(discord.ui.Modal, title="Chroma Recruit"):
 	async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
 		await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
 		traceback.print_tb(error.__traceback__)
+		
+class StaffApps(discord.ui.Modal, title="Chroma Staff Application - Helper"):
+	user = discord.ui.TextInput(label="What's your username?", placeholder="Put your Instagram @ here...", style=discord.TextStyle.short)
+	why = discord.ui.TextInput(label="Why should we pick you?", placeholder="Put your reasoning here...", style=discord.TextStyle.paragraph)
+	experience = discord.ui.TextInput(label="What kind of previous experience do you have?", placeholder="List your previous experience here...", style=discord.TextStyle.paragraph)
+	events = discord.ui.TextInput(label="What kind of activities and/or events would you initiate in Chroma, if picked as staff?", placeholder="E.g. I want to host editing challenges and movie nights", style=discord.TextStyle.paragraph)
+	other = discord.ui.TextInput(label="Anything else you want us to know?", placeholder="Extra information goes here...", style=discord.TextStyle.paragraph, required=False)
 
-class CommunityRecruits(commands.Cog, name="Recruit Commands"):
-	"""Community commands for recruits"""
+	async def on_submit(self, interaction: discord.Interaction):
+		await interaction.response.defer()
+		for response in [self.why.value, self.experience.value, self.events.value, self.other.value]:
+			if response is not None:
+				if len(response) > 1024:
+					return await interaction.followup.send("Your form reply exceeds our limits, try shortening your responses!", ephemeral=True)
+		embed = discord.Embed(title="General Staff Application 🌈", description="", color=0x2B2D31)
+		embed.add_field(name="Instagram Username", value=self.user.value, inline=False)
+		embed.add_field(name="Why should we pick you?", value=self.why.value)
+		embed.add_field(name="What kind of previous experience do you have?", value=self.experience.value, inline=False)
+		embed.add_field(name="What kind of activities and/or events would you initiate in Chroma?", value=self.events.value, inline=False)
+		embed.set_thumbnail(url="https://rqinflow.com/static/chroma-pfp-animation.gif")
+		if self.other.value:
+			embed.add_field(name="Anything else you want us to know?", value=self.other.value, inline=False)
+		async with interaction.client.db.cursor() as cursor:
+			try:
+				await cursor.execute('''INSERT INTO staff_apps (user_id, instagram) VALUES (?, ?)''', (interaction.user.id, self.user.value))
+				await interaction.client.db.commit()
+			except Exception as e:
+				if str(e) == "UNIQUE constraint failed: staff_apps.instagram":
+					return await interaction.followup.send(f"An application for **{self.instagram.value}** has already been filled out.", ephemeral=True)
+				else:
+					print(str(e))
+					return await interaction.followup.send("Something went wrong!", ephemeral=True)
+			msg = await interaction.client.get_channel(1098242178947481741).send(embed=embed, content=f"ID: {interaction.user.id}")
+			await cursor.execute('''UPDATE staff_apps SET msg_id = ? WHERE user_id = ?''', (msg.id, interaction.user.id))
+			await interaction.client.db.commit()
+		await interaction.followup.send(f'Thanks for applying to be a part of the Chroma staff! We appreciate it <3', ephemeral=True)
+
+	async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+		await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
+		traceback.print_tb(error.__traceback__)
+
+class GfxApps(discord.ui.Modal, title="Chroma Staff Application - GFX"):
+
+	def __init__(self, files: list = None):
+		super().__init__()
+		self.files = files
+
+	user = discord.ui.TextInput(label="What's your username?", style=discord.TextStyle.short)
+	why = discord.ui.TextInput(label="Why do you want to be a part of our staff?", style=discord.TextStyle.paragraph)
+	time = discord.ui.TextInput(label="How quickly can you make GFX (e.g. thumnails, banners)?", style=discord.TextStyle.short)
+	other = discord.ui.TextInput(label="Anything else you want us to know?", style=discord.TextStyle.paragraph, required=False)
+
+	async def on_submit(self, interaction: discord.Interaction):
+		await interaction.response.defer()
+		for response in [self.why.value, self.time.value, self.other.value]:
+			if response is not None:
+				if len(response) > 1024:
+					return await interaction.followup.send("Your form reply exceeds our limits, try shortening your responses!", ephemeral=True)
+		embed = discord.Embed(title="GFX Application 🌈", description="", color=0x2B2D31)
+		embed.add_field(name="Instagram Username", value=self.user.value, inline=False)
+		embed.add_field(name="Why do you want to be a part of our staff?", value=self.why.value)
+		embed.add_field(name="How quickly can you make GFX (e.g. thumnails, banners)?", value=self.time.value, inline=False)
+		embed.set_thumbnail(url="https://rqinflow.com/static/chroma-pfp-animation.gif")
+		if self.other.value:
+			embed.add_field(name="Anything else you want us to know?", value=self.other.value, inline=False)
+		if self.files != None:
+			await interaction.client.get_channel(1098242178947481741).send(embed=embed)
+			await interaction.client.get_channel(1098242178947481741).send(content=f"{self.user.value}'s previous work", files=self.files)
+		else:
+			await interaction.client.get_channel(1098242178947481741).send(embed=embed)
+		await interaction.followup.send(f'Thanks for applying to be a part of the Chroma staff! We appreciate it <3', ephemeral=True)
+
+	async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+		await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
+		traceback.print_tb(error.__traceback__)
+
+# Cog for slash commands
+
+class Slash(commands.Cog):
+	"""All of cloudy's slash commands"""
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot: commands.Bot = bot
 		super().__init__()
@@ -58,23 +138,35 @@ class CommunityRecruits(commands.Cog, name="Recruit Commands"):
 		
 	@app_commands.command(description="Get our logos")
 	@app_commands.guilds(discord.Object(id=694010548605550675))
-	async def logos(self, interaction: discord.Interaction, version: Literal["original", "newer"]):
-		"""Get our logos
-	
-        Parameters
-        -----------
-        version: {'original', 'newer'}
-            which logos to get
-        """
+	async def logos(self, interaction: discord.Interaction):
+		"""Get our logos"""
 		await interaction.response.defer(ephemeral=True)
 		channel = self.bot.get_channel(1069358104740900985)
-		if version == "original":
-			await channel.send(f"{interaction.user.mention} used the `logos original` command!")
-			await interaction.followup.send(content=f"promo code: `{old_code}`\n{old_logos}", ephemeral=True)
-		elif version == "newer":
-			await channel.send(f"{interaction.user.mention} used the `logos newer` command!")
-			await interaction.followup.send(content=f"promo code: `{new_code}`\n{new_logos}", ephemeral=True)
+		await channel.send(f"{interaction.user.mention} used the `logos` command!")
+		await interaction.followup.send(content=f"key: `{logo_code}`\n{logos}", ephemeral=True)
 
+	@app_commands.command(description="Apply to be a part of the Chroma staff")
+	@app_commands.guilds(discord.Object(id=694010548605550675))
+	async def staff(self, interaction: discord.Interaction):
+		async with interaction.client.db.cursor() as cursor:
+			await cursor.execute('''SELECT * FROM staff_apps WHERE user_id = ?''', (interaction.user.id,))
+			row = await cursor.fetchone()
+			if row:
+				return await interaction.response.send_message('You have already applied for staff!', ephemeral=True)
+		await interaction.response.send_modal(StaffApps())
+
+	@app_commands.command("Apply to be a Chroma GFX designer")
+	@app_commands.guilds(discord.Object(id=694010548605550675))
+	async def gfx(self, interaction: discord.Interaction, artwork: Optional[discord.Attachment], artwork2: Optional[discord.Attachment], artwork3: Optional[discord.Attachment], artwork4: Optional[discord.Attachment]):
+		files = []
+		for attachment in [artwork, artwork2, artwork3, artwork4]:
+			if attachment and attachment.size > 0:
+				fil = discord.File(BytesIO(await attachment.read()), filename=attachment.filename)
+				files.append(fil)
+		if len(files) > 0:
+			await interaction.response.send_modal(GfxApps(files))
+		else:
+			await interaction.response.send_modal(GfxApps())
 
 async def setup(bot: commands.Bot) -> None:
-	await bot.add_cog(CommunityRecruits(bot))
+	await bot.add_cog(Slash(bot))

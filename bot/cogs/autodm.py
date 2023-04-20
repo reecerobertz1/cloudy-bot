@@ -10,7 +10,7 @@ class autodm(commands.Cog):
         
     @commands.command(hidden=True)
     async def answer(self, ctx: Context, *, response: str):
-        """Answer a Q&A question in the Chroma Communtiy guild
+        """Answer a Q&A question in the Chroma Community guild
         
         Parameters
         -----------

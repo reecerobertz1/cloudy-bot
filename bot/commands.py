@@ -2,9 +2,6 @@ import discord
 import json
 
 from setup.lists import *
-
-import firebase_admin
-from firebase_admin import credentials
 from setup.config import *
 
 from utils.subclasses import CloudyBot
@@ -34,11 +31,5 @@ client = CloudyBot(
     status = discord.Status.online,
     activity = discord.Game("@cloudy♡ help")
 )
-
-cred = credentials.Certificate(firebase_config)
-databaseApp = firebase_admin.initialize_app(cred, {
-    'databaseURL' : dburl,
-    'storageBucket' : storageURL
-})
 
 client.run(TOKEN)

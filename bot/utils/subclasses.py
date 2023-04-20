@@ -3,7 +3,6 @@ from discord.ext import commands
 from typing import Any, Type
 import aiohttp
 import aiosqlite
-import json
 from datetime import datetime
 import asyncpg
 
@@ -81,6 +80,7 @@ class CloudyBot(commands.Bot):
         dbase = await aiosqlite.connect("utils/recruit.db")
         async with dbase.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS applications (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, accepted INTEGER, msg_id INTEGER)") 
+            await cursor.execute("CREATE TABLE IF NOT EXISTS staff_apps (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, msg_id INTEGER)") 
 
         self.db = dbase
         self.pool = pool
