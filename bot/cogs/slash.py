@@ -155,7 +155,7 @@ class Slash(commands.Cog):
 				return await interaction.response.send_message('You have already applied for staff!', ephemeral=True)
 		await interaction.response.send_modal(StaffApps())
 
-	@app_commands.command("Apply to be a Chroma GFX designer")
+	@app_commands.command(description="Apply to be a Chroma GFX designer")
 	@app_commands.guilds(discord.Object(id=694010548605550675))
 	async def gfx(self, interaction: discord.Interaction, artwork: Optional[discord.Attachment], artwork2: Optional[discord.Attachment], artwork3: Optional[discord.Attachment], artwork4: Optional[discord.Attachment]):
 		files = []
