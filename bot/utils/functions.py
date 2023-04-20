@@ -1,7 +1,5 @@
 import discord
 import datetime
-from firebase_admin import db
-from discord.ext import commands
 
 async def embedAttributes(embed_info, avatar):
     content = embed_info.split(" && ")
