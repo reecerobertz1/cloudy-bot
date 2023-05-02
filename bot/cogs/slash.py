@@ -48,7 +48,7 @@ class StaffApps(discord.ui.Modal, title="Chroma Staff Application - Helper"):
 	user = discord.ui.TextInput(label="What's your username?", placeholder="Put your Instagram @ here...", style=discord.TextStyle.short)
 	why = discord.ui.TextInput(label="Why should we pick you?", placeholder="Put your reasoning here...", style=discord.TextStyle.paragraph)
 	experience = discord.ui.TextInput(label="What kind of previous experience do you have?", placeholder="List your previous experience here...", style=discord.TextStyle.paragraph)
-	events = discord.ui.TextInput(label="What kind of activities and/or events would you initiate in Chroma, if picked as staff?", placeholder="E.g. I want to host editing challenges and movie nights", style=discord.TextStyle.paragraph)
+	events = discord.ui.TextInput(label="What would you contribute with?", placeholder="E.g. Events you wanna host and why, things you wanna improve in Chroma etc...", style=discord.TextStyle.paragraph)
 	other = discord.ui.TextInput(label="Anything else you want us to know?", placeholder="Extra information goes here...", style=discord.TextStyle.paragraph, required=False)
 
 	async def on_submit(self, interaction: discord.Interaction):
@@ -92,7 +92,7 @@ class GfxApps(discord.ui.Modal, title="Chroma Staff Application - GFX"):
 
 	user = discord.ui.TextInput(label="What's your username?", style=discord.TextStyle.short)
 	why = discord.ui.TextInput(label="Why do you want to be a part of our staff?", style=discord.TextStyle.paragraph)
-	time = discord.ui.TextInput(label="How quickly can you make GFX (e.g. thumnails, banners)?", style=discord.TextStyle.short)
+	time = discord.ui.TextInput(label="How quickly can you usually make GFX?", value="Instagram thumbnails:\nDiscord server banners:\nRecruit videos:", style=discord.TextStyle.paragraph)
 	other = discord.ui.TextInput(label="Anything else you want us to know?", style=discord.TextStyle.paragraph, required=False)
 
 	async def on_submit(self, interaction: discord.Interaction):
