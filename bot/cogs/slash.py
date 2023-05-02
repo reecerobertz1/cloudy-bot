@@ -92,7 +92,7 @@ class GfxApps(discord.ui.Modal, title="Chroma Staff Application - GFX"):
 
 	user = discord.ui.TextInput(label="What's your username?", style=discord.TextStyle.short)
 	why = discord.ui.TextInput(label="Why do you want to be a part of our staff?", style=discord.TextStyle.paragraph)
-	time = discord.ui.TextInput(label="How quickly can you usually make GFX?", value="Instagram thumbnails:\nDiscord server banners:\nRecruit videos:", style=discord.TextStyle.paragraph)
+	time = discord.ui.TextInput(label="How quickly can you usually make GFX?", default="Instagram thumbnails:\nDiscord server banners:\nRecruit videos:", style=discord.TextStyle.paragraph)
 	other = discord.ui.TextInput(label="Anything else you want us to know?", style=discord.TextStyle.paragraph, required=False)
 
 	async def on_submit(self, interaction: discord.Interaction):
