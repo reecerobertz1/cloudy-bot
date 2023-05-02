@@ -109,8 +109,8 @@ class GfxApps(discord.ui.Modal, title="Chroma Staff Application - GFX"):
 		if self.other.value:
 			embed.add_field(name="Anything else you want us to know?", value=self.other.value, inline=False)
 		if self.files != None:
-			await interaction.client.get_channel(1098242178947481741).send(embed=embed)
-			await interaction.client.get_channel(1098242178947481741).send(content=f"{self.user.value}'s previous work", files=self.files)
+			await interaction.client.get_channel(1098242178947481741).send(embed=embed, content=f"ID: {interaction.user.id}")
+			await interaction.client.get_channel(1098242178947481741).send(content=f"{interaction.user.mention}'s previous work", files=self.files)
 		else:
 			await interaction.client.get_channel(1098242178947481741).send(embed=embed)
 		await interaction.followup.send(f'Thanks for applying to be a part of the Chroma staff! We appreciate it <3', ephemeral=True)
