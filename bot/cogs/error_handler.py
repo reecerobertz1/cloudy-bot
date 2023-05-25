@@ -67,8 +67,16 @@ class CommandErrorHandler(commands.Cog):
             embed = discord.Embed(title="Error", description=f"```py\nMember Not Found```\nI can't find that member!", color=self.color)
             await ctx.reply(embed=embed, mention_author=False)
 
+        elif isinstance(error, commands.MissingPermissions):
+            if len(error.missing_permissions) == 1:
+                missing = error.missing_permissions[0]
+            else:
+                missing = ', '.join(error.missing_permissions)
+            embed = discord.Embed(title="Error", description=f"```py\nMissing Permissions```\nYou need the {missing} permissions to run this command!", color=self.color)
+            await ctx.reply(embed=embed, mention_author=False)
+
         else:
-            await ctx.send(f"I'm sorry! I ran into an error while trying to execute `{ctx.command}`, the developer has been notified!")
+            await ctx.send(f"Oh no.. I ran into an error :/ Bot developer has been notified!")
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             err = ''.join(traceback.format_exception(None, error, error.__traceback__))
