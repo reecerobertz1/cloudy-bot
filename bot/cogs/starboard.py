@@ -144,7 +144,7 @@ class Starboard(commands.Cog):
 
                 query2 = "SELECT COUNT(*) AS count FROM starrers WHERE entry_id = $1"
                 reactions = await connection.fetchval(query2, row["id"])
-            if reactions >= 5:
+            if reactions >= 3:
                 starboard_channel = guild.get_channel(self.starboard_channel_id)
                 try: # embed message already exists, let's update the reaction count
                     embed_message_id = row["star_embed_message_id"]
@@ -156,7 +156,7 @@ class Starboard(commands.Cog):
                     async with self.bot.pool.acquire() as connection:
                         query = "UPDATE stars SET star_embed_message_id = $1 WHERE id = $2"
                         await connection.execute(query, msg.id, row["id"])
-            else: # reactions are less than 5, no embed message action needed
+            else: # reactions are less than 3, no embed message action needed
                 pass
 
     async def handle_unstar(self, payload: discord.RawReactionActionEvent):
@@ -189,8 +189,8 @@ class Starboard(commands.Cog):
             async with self.bot.pool.acquire() as connection:
                 reactions = await connection.fetchval(query, row["id"])
             reactions -= 1 # we are about to remove a starrer so we need to get reactions - 1
-            if reactions < 5:
-                try: # embed message exists, but reactions are now less than 5 so let's delete the message.
+            if reactions < 3:
+                try: # embed message exists, but reactions are now less than 3 so let's delete the message.
                     starboard_channel = guild.get_channel(self.starboard_channel_id)
                     embed_message_id = row["star_embed_message_id"]
                     embed_msg = await self.get_message(starboard_channel, embed_message_id)
