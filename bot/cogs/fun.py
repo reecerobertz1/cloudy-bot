@@ -393,18 +393,16 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command(help="Sends a cat photo")
     async def cat(self, ctx: Context):
-        async with self.bot.session as session:
-            async with session.get("https://api.thecatapi.com/v1/images/search") as api:
-                json = await api.json()
-                elements = json[0]
-                await ctx.send(elements["url"])
+        async with self.bot.session.get("https://api.thecatapi.com/v1/images/search") as api:
+            json = await api.json()
+            elements = json[0]
+            await ctx.send(elements["url"])
 
     @commands.command(help="Sends a dog photo")
     async def dog(self, ctx: Context):
-        async with self.bot.session as session:
-            async with session.get("https://dog.ceo/api/breeds/image/random") as api:
-                json = await api.json()
-                await ctx.send(json['message'])
+        async with self.bot.session.get("https://dog.ceo/api/breeds/image/random") as api:
+            json = await api.json()
+            await ctx.send(json['message'])
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))
