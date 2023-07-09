@@ -472,6 +472,32 @@ class Levels(commands.Cog):
         view.add_item(button)
         await ctx.reply("Here you go! <:cuteface:756721125399986199>", view=view)
 
+    @commands.command()
+    @private_only()
+    @commands.cooldown(1, 86400, commands.BucketType.user)
+    async def daily(self, ctx: commands.Context):
+        """Claim some extra daily xp"""
+        xp = random.randint(100, 300)
+        mem = await self.get_member(ctx.author.id, ctx.guild.id)
+        if mem is not None:
+            await self.add_xp(ctx.author, xp, ctx.guild.id)
+            await ctx.send(f"Succesfully added `{xp} xp` to {ctx.author.display_name}")
+        else:
+            await self.add_member(ctx.author.id, ctx.guild.id, ctx.author.display_avatar.replace(static_format='png', size=256).url, str(ctx.author), xp)
+        await ctx.reply(f"Yay! You claimed your daily xp and got **{xp}xp**!")
+
+    @daily.error
+    async def daily_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CommandOnCooldown):
+            if error.retry_after > 3600:
+                hours = error.retry_after / 3600
+                await ctx.reply(f"You already claimed your daily xp! Try again in {hours} hours")
+            elif error.retry_after > 60:
+                minutes = error.retry_after / 60
+                await ctx.reply(f"You already claimed your daily xp! Try again in {minutes} minutes")
+            else:
+                await ctx.reply(f"You already claimed your daily xp! Try again in {error.retry_after} seconds")
+
     @commands.command(hidden=True)
     @commands.has_role(753678720119603341)
     async def add(self, ctx: commands.Context, member: discord.Member, xp: int):

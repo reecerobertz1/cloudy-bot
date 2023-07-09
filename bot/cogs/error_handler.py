@@ -99,6 +99,9 @@ class CommandErrorHandler(commands.Cog):
             embed = discord.Embed(title="Error", description=f"```py\nMissing Permissions```\nYou need the {missing} permissions to run this command!", color=self.color)
             await ctx.reply(embed=embed, mention_author=False)
 
+        elif isinstance(error, commands.CheckFailure):
+            pass
+
         else:
             await ctx.send(f"Oh no.. I ran into an error :/ Bot developer has been notified!")
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
