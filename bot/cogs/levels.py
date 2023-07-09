@@ -481,7 +481,6 @@ class Levels(commands.Cog):
         mem = await self.get_member(ctx.author.id, ctx.guild.id)
         if mem is not None:
             await self.add_xp(ctx.author, xp, ctx.guild.id)
-            await ctx.send(f"Succesfully added `{xp} xp` to {ctx.author.display_name}")
         else:
             await self.add_member(ctx.author.id, ctx.guild.id, ctx.author.display_avatar.replace(static_format='png', size=256).url, str(ctx.author), xp)
         await ctx.reply(f"Yay! You claimed your daily xp and got **{xp}xp**!")
@@ -491,12 +490,12 @@ class Levels(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             if error.retry_after > 3600:
                 hours = error.retry_after / 3600
-                await ctx.reply(f"You already claimed your daily xp! Try again in {hours} hours")
+                await ctx.reply(f"You already claimed your daily xp! Try again in {int(hours)} hours")
             elif error.retry_after > 60:
                 minutes = error.retry_after / 60
-                await ctx.reply(f"You already claimed your daily xp! Try again in {minutes} minutes")
+                await ctx.reply(f"You already claimed your daily xp! Try again in {int(minutes)} minutes")
             else:
-                await ctx.reply(f"You already claimed your daily xp! Try again in {error.retry_after} seconds")
+                await ctx.reply(f"You already claimed your daily xp! Try again in {int(error.retry_after)} seconds")
 
     @commands.command(hidden=True)
     @commands.has_role(753678720119603341)
