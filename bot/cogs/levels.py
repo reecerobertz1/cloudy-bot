@@ -180,7 +180,13 @@ class Levels(commands.Cog):
         xp_need = next_level_xp
         xp_have = xp
 
-        percentage = int(((xp_have * 100)/ xp_need))
+        prev_lvl = lvl-1
+        previous_level_xp = ((50*(prev_lvl**2))+(50*(prev_lvl-1)))
+
+        xp_progress_have = xp_have - previous_level_xp
+        xp_progress_need = xp_need - previous_level_xp
+
+        percentage = float(xp_progress_have / xp_progress_need)
 
         if percentage < 1:
             percentage = 0
@@ -229,7 +235,7 @@ class Levels(commands.Cog):
         background.text(
             (333, 217),
             f"Level {lvl}"
-            + f" | {xp} / {xp_need} XP",
+            + f" | {xp_progress_have} / {xp_progress_need} XP",
             font=poppins_small,
             color="white",
         )
