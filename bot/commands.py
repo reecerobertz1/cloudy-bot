@@ -37,18 +37,8 @@ intents.members = True
 from discord.ext import commands
 
 # Bad code moment.
-def get_prefix(bot: CloudyBot, message: discord.Message):
 
-    try:
-        with open("prefixes.json", "r") as f:
-            prefixes = json.load(f)
-
-        return prefixes[str(message.guild.id)]
-        
-    except AttributeError:
-        return '+' 
-
-client = CloudyBot(
+bot = CloudyBot(
     command_prefix = get_prefix,
     intents = intents,
     case_insensitive=True,
@@ -56,4 +46,4 @@ client = CloudyBot(
     activity = discord.Game("@cloudy♡ help")
 )
 
-client.run(TOKEN)
+bot.run(TOKEN)

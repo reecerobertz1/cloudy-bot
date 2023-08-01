@@ -29,13 +29,10 @@ import aiohttp
 import aiosqlite
 from datetime import datetime
 import asyncpg
+import json
 
 from setup.lists import *
 from setup.config import *
-
-intents = discord.Intents.all()
-intents.presences = True
-intents.members = True
 
 TEST_GUILD = discord.Object(id=835495688832811039)
 
@@ -55,8 +52,23 @@ class CloudyBot(commands.Bot):
     db: aiosqlite.Connection
     session: aiohttp.ClientSession
 
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        intents = discord.Intents(
+            guilds=True,
+            members=True,
+            emojis=True,
+            messages=True,
+            reactions=True,
+            message_content=True,
+            presences=True
+        )
+        super().__init__(
+            command_prefix=get_prefix,
+            intents=intents,
+            case_insensitive=True,
+            status=discord.Status.online,
+            activity=discord.Game("@cloudy♡ help")
+        )
 
         self._context: Type[Context]
 
@@ -109,8 +121,20 @@ class CloudyBot(commands.Bot):
         self.pool = pool
 
     async def close(self):
+        await self.pool.close()
         await super().close()
         await self.session.close()
 
     async def on_ready(self):
         print('Cloudy is now online!')
+
+def get_prefix(bot: CloudyBot, message: discord.Message):
+
+    try:
+        with open("prefixes.json", "r") as f:
+            prefixes = json.load(f)
+
+        return prefixes[str(message.guild.id)]
+        
+    except AttributeError:
+        return '+'
