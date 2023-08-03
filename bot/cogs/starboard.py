@@ -301,7 +301,8 @@ class Starboard(commands.Cog):
         total_stars_recieved = await self.get_recieved_stars(member)
         total_stars_given = await self.get_given_stars(member)
         messages_on_sb = await self.get_messages_on_starboard(member)
-        embed = discord.Embed(title=f"Starboard stats | {member.display_name}", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}")
+        embed = discord.Embed(title=f"Starboard stats", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}")
+        embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
         await ctx.send(embed=embed)
 
     @star.command(aliases=["show", "see"])
