@@ -131,11 +131,11 @@ class Levels(commands.Cog):
                 await connection.execute(query, member_id, reason, month)
         await self.bot.pool.release(connection)
 
-    async def get_ia(self, member_id: int) -> Optional[Inactivity]:
+    async def get_ia(self, member_id: int, month: Optional[str]) -> Optional[Inactivity]:
         query = "SELECT user_id, reason, month FROM inactives WHERE user_id = $1 AND month = $2;"
         async with self.bot.pool.acquire() as connection:
             async with connection.transaction():
-                row = await connection.fetchrow(query, member_id)
+                row = await connection.fetchrow(query, member_id, month)
         await self.bot.pool.release(connection)
         return row
 

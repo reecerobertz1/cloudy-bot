@@ -54,6 +54,13 @@ class events(commands.Cog):
                 await connection.execute(query, userid)
         await self.bot.pool.release(connection)
 
+    async def delete_rank(self, userid: int) -> None:
+        query = "DELETE FROM levels WHERE user_id = $1 AND guild_id = 694010548605550675"
+        async with self.bot.pool.acquire() as connection:
+            async with connection.transaction():
+                await connection.execute(query, userid)
+        await self.bot.pool.release(connection)
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         try:
@@ -172,6 +179,7 @@ class events(commands.Cog):
     async def on_member_remove(self, member: discord.Member):
         stored_guild_id = 694010548605550675
         if member.guild.id == stored_guild_id:
+            await self.delete_rank(userid=member.id)
             embed = discord.Embed(title="Member left!", color=0x96bfff, description=f"{member.mention} has left the discord.")
             embed.set_thumbnail(url=member.display_avatar.url)
             embed.set_footer(text='i hope to see you again!', icon_url='https://cdn.discordapp.com/attachments/799984745772875786/800015677653909504/yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png')

@@ -37,6 +37,14 @@ class Starboard(commands.Cog):
         self.starboard_channel_id = 1090249213188784138
         self.chroma_guild_id = 694010548605550675
 
+    def private_only():
+        def predicate(ctx):
+            if ctx.guild.id == 694010548605550675:
+                return True
+            else:
+                return False
+        return commands.check(predicate)
+
     def find_spoiler_urls(self, text: str, url: str) -> bool:
         spoilers = self.spoiler_regex.findall(text)
         spoiler_url = []
@@ -49,7 +57,7 @@ class Starboard(commands.Cog):
             return False
     
     def starboard_embed(self, message: discord.Message, author: discord.Member):
-        # creates an embed to send in starboard channel / star show command
+        # creates an embed to send in starboard channel / star view command
         embed = discord.Embed(
             description=message.content,
             color=0x2B2D31
@@ -102,6 +110,24 @@ class Starboard(commands.Cog):
             row = await connection.fetchrow(query, message_id)
         return row
     
+    async def get_recieved_stars(self, member: discord.Member):
+        query = "SELECT COUNT(*) FROM stars WHERE author_id = $1"
+        async with self.bot.pool.acquire() as connection:
+            row = await connection.fetchrow(query, member.id)
+        return row['count']
+    
+    async def get_given_stars(self, member: discord.Member):
+        query = "SELECT COUNT(DISTINCT entry_id) FROM starrers WHERE author_id = $1"
+        async with self.bot.pool.acquire() as connection:
+            row = await connection.fetchrow(query, member.id)
+        return row['count']
+
+    async def get_messages_on_starboard(self, member: discord.Member):
+        query = "SELECT COUNT(*) FROM stars WHERE star_embed_message_id IS NOT NULL AND author_id = $1"
+        async with self.bot.pool.acquire() as connection:
+            row = await connection.fetchrow(query, member.id)
+        return row['count']
+
     async def get_message(self, channel: discord.abc.Messageable, message_id: int) -> Optional[discord.Message]:
         # gets message from cache or fetches it
         try:
@@ -255,6 +281,46 @@ class Starboard(commands.Cog):
             async with self.bot.pool.acquire() as connection:
                 query = "DELETE FROM stars WHERE star_embed_message_id = $1;"
                 await connection.execute(query, message["star_embed_message_id"])
+
+    @commands.group()
+    @private_only()
+    async def star(self, ctx: Context):
+        pass
+    
+    @star.command()
+    @private_only()
+    async def stats(self, ctx: Context, member: Optional[discord.Member]):
+        """Gets a member's starboard stats
+        
+        Parameters
+        ----------
+        member: discord.Member
+            member to get stats for
+        """
+        member = member if member else ctx.author
+        total_stars_recieved = await self.get_recieved_stars(member)
+        total_stars_given = await self.get_given_stars(member)
+        messages_on_sb = await self.get_messages_on_starboard(member)
+        embed = discord.Embed(title=f"Starboard stats | {member.display_name}", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}")
+        await ctx.send(embed=embed)
+
+    @star.command(aliases=["show", "see"])
+    @private_only()
+    async def view(self, ctx: Context, message_id: int):
+        """View a starboard post
+        
+        Parameters
+        ----------
+        message_id: int
+            ID of the starboard post
+        """
+        entry = await self.get_star_entry(message_id)
+        channel = ctx.guild.get_channel(self.starboard_channel_id)
+        if entry["star_embed_message_id"] is not None:
+            message = await channel.fetch_message(entry["star_embed_message_id"])
+            await ctx.reply(embed=message.embeds[0])
+        else:
+            await ctx.reply("Couldn't find that starboard post!")
 
     @tasks.loop(hours=1.5)
     async def clean_message_cache(self):
