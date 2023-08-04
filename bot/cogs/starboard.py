@@ -111,7 +111,14 @@ class Starboard(commands.Cog):
         return row
     
     async def get_recieved_stars(self, member: discord.Member):
-        query = "SELECT COUNT(*) FROM stars WHERE author_id = $1"
+        query = '''SELECT COUNT(*)
+            FROM starrers
+            WHERE entry_id IN (
+                SELECT id
+                FROM stars
+                WHERE author_id = $1
+            );'''
+
         async with self.bot.pool.acquire() as connection:
             row = await connection.fetchrow(query, member.id)
         return row['count']
