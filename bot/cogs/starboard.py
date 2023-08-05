@@ -56,7 +56,7 @@ class Starboard(commands.Cog):
         else:
             return False
     
-    def starboard_embed(self, message: discord.Message, author: discord.Member):
+    def starboard_embed(self, message: discord.Message, author: discord.Member) -> discord.Embed:
         # creates an embed to send in starboard channel / star view command
         embed = discord.Embed(
             description=message.content,
@@ -110,7 +110,7 @@ class Starboard(commands.Cog):
             row = await connection.fetchrow(query, message_id)
         return row
     
-    async def get_recieved_stars(self, member: discord.Member):
+    async def get_recieved_stars(self, member: discord.Member) -> int:
         query = '''SELECT COUNT(*)
             FROM starrers
             WHERE entry_id IN (
@@ -123,17 +123,23 @@ class Starboard(commands.Cog):
             row = await connection.fetchrow(query, member.id)
         return row['count']
     
-    async def get_given_stars(self, member: discord.Member):
+    async def get_given_stars(self, member: discord.Member) -> int:
         query = "SELECT COUNT(DISTINCT entry_id) FROM starrers WHERE author_id = $1"
         async with self.bot.pool.acquire() as connection:
             row = await connection.fetchrow(query, member.id)
         return row['count']
 
-    async def get_messages_on_starboard(self, member: discord.Member):
+    async def get_messages_on_starboard(self, member: discord.Member) -> int:
         query = "SELECT COUNT(*) FROM stars WHERE star_embed_message_id IS NOT NULL AND author_id = $1"
         async with self.bot.pool.acquire() as connection:
             row = await connection.fetchrow(query, member.id)
         return row['count']
+
+    async def get_most_starred_message(self, member: discord.Member) -> tuple[int, str, str]:
+        query = '''SELECT *, (SELECT COUNT(*) FROM starrers WHERE starrers.entry_id = stars.id) AS star_count FROM stars WHERE author_id = $1 ORDER BY star_count DESC LIMIT 1;'''
+        async with self.bot.pool.acquire() as connection:
+            row = await connection.fetchrow(query, member.id)
+        return row['star_count'], f"https://discord.com/channels/{self.chroma_guild_id}/{row['channel_id']}/{row['message_id']}", f"https://discord.com/channels/{self.chroma_guild_id}/{self.starboard_channel_id}/{row['star_embed_message_id']}"
 
     async def get_message(self, channel: discord.abc.Messageable, message_id: int) -> Optional[discord.Message]:
         # gets message from cache or fetches it
@@ -308,8 +314,13 @@ class Starboard(commands.Cog):
         total_stars_recieved = await self.get_recieved_stars(member)
         total_stars_given = await self.get_given_stars(member)
         messages_on_sb = await self.get_messages_on_starboard(member)
-        embed = discord.Embed(title=f"Starboard stats", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}")
-        embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
+        if messages_on_sb == 0:
+            embed = discord.Embed(title=f"Starboard stats", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}")
+            embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
+        else:
+            most_starred_number, most_starred_link, star_post_link = self.get_most_starred_message(member)
+            embed = discord.Embed(title=f"Starboard stats", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}\n* **Most starred message:** [{most_starred_number} stars]({most_starred_link}) -> [See post]({star_post_link})")
+            embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
         await ctx.send(embed=embed)
 
     @star.command(aliases=["show", "see"])
@@ -326,7 +337,7 @@ class Starboard(commands.Cog):
         channel = ctx.guild.get_channel(self.starboard_channel_id)
         if entry["star_embed_message_id"] is not None:
             message = await channel.fetch_message(entry["star_embed_message_id"])
-            await ctx.reply(embed=message.embeds[0])
+            await ctx.reply(content=message.content, embed=message.embeds[0])
         else:
             await ctx.reply("Couldn't find that starboard post!")
 
