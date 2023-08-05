@@ -319,7 +319,7 @@ class Starboard(commands.Cog):
             embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
         else:
             most_starred_number, most_starred_link, star_post_link = await self.get_most_starred_message(member)
-            embed = discord.Embed(title=f"Starboard stats", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}\n* **Most starred message:** [{most_starred_number} stars]({most_starred_link}) -> [See post]({star_post_link})")
+            embed = discord.Embed(title=f"Starboard stats", description=f"* **Stars recieved:** {total_stars_recieved if total_stars_recieved != 0 else 'None just yet!'}\n* **Stars given to others:** {total_stars_given if total_stars_given != 0 else 'None :/'}\n* **Starboard messages:** {messages_on_sb if messages_on_sb != 0 else 'None so far!'}\n* **Most starred message:** [{most_starred_number} stars]({most_starred_link}) | [See post]({star_post_link})")
             embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
         await ctx.send(embed=embed)
 
@@ -335,7 +335,7 @@ class Starboard(commands.Cog):
         """
         entry = await self.get_star_entry(message_id)
         channel = ctx.guild.get_channel(self.starboard_channel_id)
-        if entry["star_embed_message_id"] is not None:
+        if entry is not None and entry["star_embed_message_id"] is not None:
             message = await channel.fetch_message(entry["star_embed_message_id"])
             await ctx.reply(content=message.content, embed=message.embeds[0])
         else:
