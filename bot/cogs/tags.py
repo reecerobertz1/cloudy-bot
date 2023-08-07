@@ -65,7 +65,7 @@ class Tags(commands.Cog):
             async with conn.transaction():
                 query = '''INSERT INTO tags (name, content, owner_id, guild_id, created_at, uses) VALUES ($1, $2, $3, $4, $5, $6)'''
                 try:
-                    await conn.execute(query, name, response, ctx.author.id, ctx.guild.id, datetime.datetime.now().timestamp(), 0)
+                    await conn.execute(query, name, response, ctx.author.id, ctx.guild.id, discord.utils.utcnow(), 0)
                     await ctx.reply(f'Succesfully created the tag `{name}`')
                 except UniqueViolationError:
                     await ctx.reply('That tag already exists!')
