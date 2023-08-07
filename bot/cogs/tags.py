@@ -3,7 +3,7 @@ from discord.ext import commands
 import datetime
 from utils.subclasses import Context, CloudyBot
 from asyncpg.exceptions import UniqueViolationError
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, Annotated
 
 class TagEntry(TypedDict):
     id: int
@@ -26,7 +26,7 @@ class Tags(commands.Cog):
         return response
 
     @commands.group(invoke_without_command=True, aliases=['t'])
-    async def tag(self, ctx: Context, name: str):
+    async def tag(self, ctx: Context, name: Annotated[str, commands.clean_content]):
         """Sends a tag
         
         Parameters
@@ -50,7 +50,7 @@ class Tags(commands.Cog):
                     await ctx.send("Couldn't find the tag")
 
     @tag.command()
-    async def create(self, ctx: Context, name: str, *, response: str):
+    async def create(self, ctx: Context, name: Annotated[str, commands.clean_content], *, response: Annotated[str, commands.clean_content]):
         """Create a tag
         
         Parameters
@@ -70,7 +70,7 @@ class Tags(commands.Cog):
                     await ctx.reply('That tag already exists!')
 
     @tag.command()
-    async def edit(self, ctx: Context, name: str, *, response: str):
+    async def edit(self, ctx: Context, name: Annotated[str, commands.clean_content], *, response: Annotated[str, commands.clean_content]):
         """Edit one of your tags
         
         Parameters
@@ -88,7 +88,7 @@ class Tags(commands.Cog):
                 if not response[0] == ctx.author.id:
                     await ctx.reply("You can't edit a tag you do not own!")
                 else:
-                    await conn.execute(up_query, response, name, ctx.guild.id)
+                    await conn.execute(up_query, response[0], name, ctx.guild.id)
                     await ctx.reply(f"Updated your tag `{name}`")
 
     @tag.command()
@@ -106,7 +106,7 @@ class Tags(commands.Cog):
             embed.add_field(name="Name", value=str(response['name']), inline=False)
             embed.add_field(name="Owner", value=f"<@!{response['owner_id']}>", inline=False)
             embed.add_field(name="Usage", value=response['uses'], inline=False)
-            embed.add_field(name="Created at", value=f"{discord.utils.format_dt(response['created_at'])}", inline=False)
+            embed.add_field(name="Created at", value=f"{discord.utils.format_dt(response['created_at'], 'D')}", inline=False)
             await ctx.send(embed=embed)
         else:
             await ctx.reply("Tag not found!")
