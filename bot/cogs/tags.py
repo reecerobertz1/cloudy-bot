@@ -102,11 +102,11 @@ class Tags(commands.Cog):
         """
         response = await self.get_tag(name, ctx.guild.id)
         if response != None:
-            embed = discord.Embed(title=f"Tag information", color=0x303136)
+            embed = discord.Embed(title=f"Tag information")
             embed.add_field(name="Name", value=str(response['name']), inline=False)
             embed.add_field(name="Owner", value=f"<@!{response['owner_id']}>", inline=False)
             embed.add_field(name="Usage", value=response['uses'], inline=False)
-            embed.add_field(name="Created at", value=f"<t:{response['created_at']}:D>", inline=False)
+            embed.add_field(name="Created at", value=f"{discord.utils.format_dt(response['created_at'])}", inline=False)
             await ctx.send(embed=embed)
         else:
             await ctx.reply("Tag not found!")
