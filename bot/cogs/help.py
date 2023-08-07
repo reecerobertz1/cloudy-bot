@@ -139,29 +139,40 @@ class HelpCommand(commands.MinimalHelpCommand):
         view.message = await channel.send(embed=embed, view=view)
 
     async def send_command_help(self, command):
-        embed = discord.Embed(title=self.get_command_signature(command), color=0x9E74FF)
-        embed.add_field(name="Help", value=command.help)
+        embed = discord.Embed(title=self.get_command_signature(command), description=command.help, color=0x9E74FF)
         alias = command.aliases
+        extras = command.extras
+        fix = self.context.clean_prefix
         if alias:
-            embed.add_field(name="Aliases", value=", ".join(alias), inline=False)
+            embed.add_field(name="aliases", value=", ".join(alias), inline=False)
         arguments = command.clean_params.values()
         if arguments:
             description = []
-            o_indent = "ㅤ  "
-            indent_2 = " <:reply:1087336198932021258>"
+            # o_indent = "ㅤ  "
+            indent_2 = " <:reply:1125190041447182456>"
             for argument in arguments:
+                # fields that explain the command's arguments
                 if argument.required == True:
-                    description.append(f"`❗{argument.name}`\n{argument.description}")
+                    description.append(f"`{argument.name} (required)`\n{indent_2}{argument.description}")
                 else:
                     if argument.default:
-                        description.append(f"`🫧 {argument.name}` → `defaults to {argument.default}`\n{argument.description}")
+                        description.append(f"`{argument.name}` → `defaults to {argument.default}`\n{indent_2}{argument.description}")
                     else:
-                        description.append(f"`🫧 {argument.name}`\n{argument.description}")
-            embed.add_field(name="Arguments", value="\n".join(description), inline=False)
-            embed.set_footer(text="🫧 optional  |❗required")
+                        description.append(f"`{argument.name} (optional)`\n{indent_2}{argument.description}")
+            embed.add_field(name="arguments", value="\n".join(description), inline=False)
+        if len(extras) != 0:
+            # fields that explain how to use the command
+            # this info is stored in command.extras
+            # see the xp commands in cogs/levels.py for examples
+            if len(extras['examples']) > 1:
+                # if there are several examples we handle them in a for loop
+                embed.add_field(name="usage examples", value='\n'.join([fix + example for example in extras['examples']]), inline=False)
+            else:
+                # if there's only one we just add it
+                embed.add_field(name="usage example", value=fix + extras['examples'][0], inline=False)
+
 
         embed.set_thumbnail(url=self.context.bot.user.avatar.url)
-
         channel = self.get_destination()
         await channel.send(embed=embed)
 
