@@ -84,11 +84,11 @@ class Tags(commands.Cog):
             async with conn.transaction():
                 query = '''SELECT owner_id FROM tags WHERE name = $1 AND guild_id = $2'''
                 up_query = '''UPDATE tags SET content = $1 WHERE name = $2 AND guild_id = $3'''
-                response = await conn.fetchrow(query, name, ctx.guild.id)
-                if not response[0] == ctx.author.id:
+                resp = await conn.fetchrow(query, name, ctx.guild.id)
+                if not resp[0] == ctx.author.id:
                     await ctx.reply("You can't edit a tag you do not own!")
                 else:
-                    await conn.execute(up_query, response[0], name, ctx.guild.id)
+                    await conn.execute(up_query, response, name, ctx.guild.id)
                     await ctx.reply(f"Updated your tag `{name}`")
 
     @tag.command()
