@@ -22,8 +22,7 @@ class Tags(commands.Cog):
         async with self.bot.pool.acquire() as conn:
             async with conn.transaction():
                 query = '''SELECT * FROM tags WHERE name = $1 AND guild_id = $2'''
-                await conn.fetchrow(query, name, guild_id)
-                response = await conn.fetchrow()
+                response = await conn.fetchrow(query, name, guild_id)
         return response
 
     @commands.group(invoke_without_command=True, aliases=['t'])
