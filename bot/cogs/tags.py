@@ -51,7 +51,7 @@ class Tags(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=['t'])
     async def tag(self, ctx: Context, name: Annotated[str, commands.clean_content]):
-        """Sends a tag
+        """sends a tag
         
         Parameters
         ----------
@@ -73,9 +73,9 @@ class Tags(commands.Cog):
                 else:
                     await ctx.send("Couldn't find the tag")
 
-    @tag.command()
+    @tag.command(extras={"examples": ["tag create example this is an example", "tag create 'with spaces' use quotation marks to make tag names with spaces in them"]})
     async def create(self, ctx: Context, name: Annotated[str, commands.clean_content], *, response: Annotated[str, commands.clean_content]):
-        """Create a tag
+        """create a tag
         
         Parameters
         ----------
@@ -93,9 +93,9 @@ class Tags(commands.Cog):
                 except UniqueViolationError:
                     await ctx.reply('That tag already exists!')
 
-    @tag.command()
+    @tag.command(extras={"examples": ["tag edit example this is my example tag on how to edit a tag named example"]})
     async def edit(self, ctx: Context, name: Annotated[str, commands.clean_content], *, response: Annotated[str, commands.clean_content]):
-        """Edit one of your tags
+        """edit one of your tags
         
         Parameters
         ----------
@@ -115,9 +115,9 @@ class Tags(commands.Cog):
                     await conn.execute(up_query, response, name, ctx.guild.id)
                     await ctx.reply(f"Updated your tag `{name}`")
 
-    @tag.command()
+    @tag.command(extras={"examples": ["tag info sometagname"]})
     async def info(self, ctx: Context, name: str):
-        """Get some info on a tag
+        """get some info on a tag
         
         Parameters
         ----------

@@ -149,7 +149,7 @@ class HelpCommand(commands.MinimalHelpCommand):
         if arguments:
             description = []
             # o_indent = "ㅤ  "
-            indent_2 = " <:reply:1125190041447182456>"
+            indent_2 = " <:reply:1087336198932021258>"
             for argument in arguments:
                 # fields that explain the command's arguments
                 if argument.required == True:
