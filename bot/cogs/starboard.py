@@ -303,7 +303,7 @@ class Starboard(commands.Cog):
     @star.command()
     @private_only()
     async def stats(self, ctx: Context, member: Optional[discord.Member]):
-        """Gets a member's starboard stats
+        """gets a member's starboard stats
         
         Parameters
         ----------
@@ -326,12 +326,12 @@ class Starboard(commands.Cog):
     @star.command(aliases=["show", "see"])
     @private_only()
     async def view(self, ctx: Context, message_id: int):
-        """View a starboard post
+        """view a starboard post
         
         Parameters
         ----------
         message_id: int
-            ID of the starboard post
+            id of the message that has been starred
         """
         entry = await self.get_star_entry(message_id)
         channel = ctx.guild.get_channel(self.starboard_channel_id)
