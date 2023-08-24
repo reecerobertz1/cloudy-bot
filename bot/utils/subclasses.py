@@ -114,7 +114,7 @@ class CloudyBot(commands.Bot):
                 await connection.execute("CREATE TABLE IF NOT EXISTS inactives (user_id bigint , reason text , month text, PRIMARY KEY(user_id, month))")
                 await connection.execute("CREATE TABLE IF NOT EXISTS edits (id SERIAL, username TEXT PRIMARY KEY)")
                 await connection.execute("CREATE TABLE IF NOT EXISTS tags (id SERIAL, name TEXT NOT NULL, content TEXT NOT NULL, owner_id BIGINT NOT NULL, guild_id BIGINT NOT NULL, uses INT, created_at TIMESTAMP WITH TIME ZONE, PRIMARY KEY (name, owner_id, guild_id))")
-                await connection.execute("CREATE TABLE IF NOT EXISTS tag_aliases (id SERIAL PRIMARY KEY, alias TEXT NOT NULL, tag_id INT NOT NULL REFERENCES tags (id) ON DELETE CASCADE)")
+                # await connection.execute("CREATE TABLE IF NOT EXISTS tag_aliases (id SERIAL PRIMARY KEY, alias TEXT NOT NULL, tag_id INT NOT NULL REFERENCES tags (id) ON DELETE CASCADE)")
 
         dbase = await aiosqlite.connect("recruit.db")
         async with dbase.cursor() as cursor:
