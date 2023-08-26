@@ -7,6 +7,7 @@ import logging.handlers
 from utils.subclasses import CloudyBot
 from setup.lists import *
 from setup.config import * 
+from utils.views import ShowGiveawayContributers
 
 bot = CloudyBot()
 
@@ -15,7 +16,7 @@ async def verify(interaction: discord.Interaction, message: discord.Message):
     await interaction.response.defer(ephemeral=True)
     try:
         embed = discord.Embed(title="Chroma Giveaway", description=ga_msg, color=0x6150ab)
-        await message.author.send(embed=embed, content=ga_link)
+        await message.author.send(embed=embed, content=ga_link, view=ShowGiveawayContributers())
     except discord.errors.Forbidden:
         # dms are off...
         await interaction.followup.send(f"oh no! {str(message.author).lower()} has their dms off. :/")
