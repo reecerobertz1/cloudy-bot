@@ -23,6 +23,6 @@ class ShowGiveawayContributers(discord.ui.View):
         if member is None:
             return await interaction.response.send("You need to be in the Chroma Community server to use this button")
         if member.is_on_mobile() == True:
-            await interaction.response.send_message(self.contribs_simple, ephemeral=True)
+            await interaction.response.send_message(contribs_simple, ephemeral=True)
         else:
-            await interaction.response.send_message(self.contribs, ephemeral=True)
+            await interaction.response.send_message(contribs, ephemeral=True)
