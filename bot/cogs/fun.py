@@ -42,6 +42,7 @@ import functools
 from typing import Optional
 from utils.subclasses import Context
 from urllib.parse import quote_plus
+from utils.muma import LyricsFinder, Track
 
 imgur = ImgurClient(imgur_id, imgur_secret)
 
@@ -427,6 +428,23 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
         async with self.bot.session.get("https://dog.ceo/api/breeds/image/random") as api:
             json = await api.json()
             await ctx.send(json['message'])
+
+    @commands.command()
+    async def lyrics(self, ctx: Context, *, song_name: str):
+        mimx = LyricsFinder()
+        new_song_name = song_name.replace(' ', '-')
+        songs = await mimx.song_search(new_song_name)
+        try:
+            if len(songs) == 0:
+                await ctx.reply("Couldn't find that song!")
+            else:
+                track: Track = songs[0]
+                lyrics = await track.get_lyrics()
+                embed = discord.Embed(title=track.name, description=lyrics)
+                embed.set_thumbnail(url=track.cover_art)
+                await ctx.reply(embed=embed, view=SpotifyView("https://open.spotify.com/track/" + track.spotify_id))
+        except:
+            await ctx.reply(f"Looks like I couldn't find lyrics for **{song_name}**")
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))

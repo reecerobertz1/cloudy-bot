@@ -21,3 +21,6 @@ config.py
 # db
 recruit.db
 bot/setup/config.py
+
+# lyrics finder
+bot/utils/muma.py
