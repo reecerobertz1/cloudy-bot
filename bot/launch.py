@@ -19,7 +19,7 @@ async def verify(interaction: discord.Interaction, message: discord.Message):
         await message.author.send(embed=embed, content=ga_link, view=ShowGiveawayContributers())
     except discord.errors.Forbidden:
         # dms are off...
-        await interaction.followup.send(f"oh no! {str(message.author).lower()} has their dms off. :/")
+        return await interaction.followup.send(f"oh no! {str(message.author).lower()} has their dms off. :/")
 
     await message.add_reaction("✅")
     await interaction.followup.send(f"Giveaway link has been sent to {str(message.author)} :]")
