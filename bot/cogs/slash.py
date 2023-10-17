@@ -34,7 +34,7 @@ from io import BytesIO
 
 class Recruit(discord.ui.Modal, title="Chroma Recruit"):
 	instagram = discord.ui.TextInput(label="Instagram Username", placeholder="Put username here...")
-	edit_link = discord.ui.TextInput(label="Link to edit (Instagram/Streamble Only)", placeholder="Put a link to an edit here...")
+	edit_link = discord.ui.TextInput(label="Link to edit (Instagram/Streamble/TikTok)", placeholder="Put a link to an edit here...")
 	program = discord.ui.TextInput(label="Editing Program", placeholder="Put the editing program you use here...")
 	other = discord.ui.TextInput(label="Anything else you want us to know?", placeholder="Put other information here...", required=False)
 
@@ -51,11 +51,13 @@ class Recruit(discord.ui.Modal, title="Chroma Recruit"):
 			embed.add_field(name="Anything else", value=self.other.value, inline=False)
 		async with interaction.client.db.cursor() as cursor:
 			try:
-				await cursor.execute('''INSERT INTO applications (user_id, instagram, accepted) VALUES (?, ?, ?)''', (interaction.user.id, self.instagram.value, 0))
+				await cursor.execute('''INSERT INTO applications (user_id, instagram, accepted, apply_number) VALUES (?, ?, ?, ?)''', (interaction.user.id, self.instagram.value, 0, 1))
 				await interaction.client.db.commit()
 			except Exception as e:
-				if str(e) == "UNIQUE constraint failed: applications.instagram":
-					return await interaction.followup.send(f"An entry for **{self.instagram.value}** has already been registered. If this wasn't you, please notify a staff member and they will help you out!", ephemeral=True)
+				if str(e) == "UNIQUE constraint failed: applications.instagram" or str(e) == "UNIQUE constraint failed: applications.user_id":
+					await cursor.execute('''UPDATE applications SET apply_number = ? WHERE user_id = ?''', (2, interaction.user.id))
+					await interaction.client.db.commit()
+					#return await interaction.followup.send(f"An entry for **{self.instagram.value}** has already been registered. If this wasn't you, please notify a staff member and they will help you out!", ephemeral=True)
 				else:
 					print(str(e))
 					return await interaction.followup.send("Something went wrong!", ephemeral=True)
@@ -128,7 +130,7 @@ class GfxApps(discord.ui.Modal, title="Chroma Staff Application - GFX"):
 		embed = discord.Embed(title="GFX Application 🌈", description="", color=0x2B2D31)
 		embed.add_field(name="Instagram Username", value=self.user.value, inline=False)
 		embed.add_field(name="Why do you want to be a part of our staff?", value=self.why.value)
-		embed.add_field(name="How quickly can you make GFX (e.g. thumnails, banners)?", value=self.time.value, inline=False)
+		embed.add_field(name="How quickly can you make GFX (e.g. thumbnails, banners)?", value=self.time.value, inline=False)
 		embed.set_thumbnail(url="https://rqinflow.com/static/chroma-pfp-animation.gif")
 		if self.other.value:
 			embed.add_field(name="Anything else you want us to know?", value=self.other.value, inline=False)
@@ -156,9 +158,25 @@ class Slash(commands.Cog):
 		async with interaction.client.db.cursor() as cursor:
 			await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (interaction.user.id,))
 			row = await cursor.fetchone()
-			if row:
-				return await interaction.response.send_message('You have already applied!', ephemeral=True)
+			if row is not None:
+				if int(row[4]) == 2:
+					return await interaction.response.send_message("You've already applied twice!", ephemeral=True)
 		await interaction.response.send_modal(Recruit())
+		
+	@app_commands.command(description="Check how many times you've applied")
+	async def applycheck(self, interaction: discord.Interaction):
+		await interaction.response.defer(ephemeral=True)
+		async with interaction.client.db.cursor() as cursor:
+			await cursor.execute('''SELECT * FROM applications WHERE user_id = ?''', (interaction.user.id,))
+			row = await cursor.fetchone()
+			if row is not None:
+				if int(row[4]) == 2:
+					times = 2
+				if int(row[4]) == 1:
+					times = 1
+			else:
+				times = 0
+		await interaction.followup.send(f"You have applied {times} time!" if times == 1 else f"You have applied {times} times!", ephemeral=True)
 		
 	@app_commands.command(description="Get our logos")
 	@app_commands.guilds(discord.Object(id=694010548605550675))
