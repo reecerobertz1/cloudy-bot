@@ -29,6 +29,7 @@ import traceback
 from setup.config import *
 from typing import Optional
 from io import BytesIO
+import sys
 
 # Modals
 
@@ -59,7 +60,7 @@ class Recruit(discord.ui.Modal, title="Chroma Recruit"):
 					await interaction.client.db.commit()
 					#return await interaction.followup.send(f"An entry for **{self.instagram.value}** has already been registered. If this wasn't you, please notify a staff member and they will help you out!", ephemeral=True)
 				else:
-					traceback.print_tb(e.__traceback__)
+					traceback.print_exception(type(e), e, e.__traceback__, file=sys.stderr)
 					return await interaction.followup.send("Something went wrong!", ephemeral=True)
 			msg = await interaction.client.get_channel(835497793703247903).send(embed=embed)
 			await cursor.execute('''UPDATE applications SET msg_id = ? WHERE user_id = ?''', (msg.id, interaction.user.id))
