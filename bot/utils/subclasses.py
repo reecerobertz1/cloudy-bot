@@ -118,7 +118,7 @@ class CloudyBot(commands.Bot):
 
         dbase = await aiosqlite.connect("recruit.db")
         async with dbase.cursor() as cursor:
-            await cursor.execute("CREATE TABLE IF NOT EXISTS applications (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, accepted INTEGER, msg_id INTEGER)") 
+            await cursor.execute("CREATE TABLE IF NOT EXISTS applications (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, accepted INTEGER, msg_id INTEGER, apply_number INTEGER)") 
             await cursor.execute("CREATE TABLE IF NOT EXISTS staff_apps (user_id INTEGER PRIMARY KEY, instagram TEXT UNIQUE, msg_id INTEGER)") 
 
         self.db = dbase
