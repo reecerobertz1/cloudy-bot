@@ -75,12 +75,18 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
         duration2 = strftime("%M:%S", gmtime(time_along))
         full_time_percent = duration / 100
         left_of_current = time_along / full_time_percent
+        artists = spotify.artist.split(";")
 
         if len(spotify.title) > 20:
             title = spotify.title[0:15] + "..." 
         else:
             title = spotify.title
-        ImageDraw.Draw(image).text((20,30), f"{title}\n{spotify.artist}", colors[1], font=font)
+        if len(spotify.artist) > 20 and len(artists) > 1:
+            artist = artists[0][0:15] + "..." if len(artists[0]) > 20 else artists[0]
+        else:
+            artist = ", ".join(artists) if len(artists) > 1 else spotify.artist
+            artist = artist[0:15] + "..." if len(artist) > 20 else artist
+        ImageDraw.Draw(image).text((20,30), f"{title}\n{artist}", colors[1], font=font)
         ImageDraw.Draw(image).line([(20, 200), (600, 200)], fill=colors[1], width=5)
         ImageDraw.Draw(image).text((20,220), f"{duration2}", colors[1], font=font2)
         ImageDraw.Draw(image).text((535,220), f"{duration1}", colors[1], font=font2)
@@ -430,8 +436,14 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
             await ctx.send(json['message'])
 
     @commands.command()
-    async def lyrics(self, ctx: Context, *, song_name: str):
+    async def lyrics(self, ctx: Context, *, song_name: Optional[str]):
         mimx = LyricsFinder()
+        if not song_name:
+            spotify = discord.utils.find(lambda a: isinstance(a, discord.Spotify), ctx.author.activities)
+            if spotify:
+                song_name = f"{spotify.title} {spotify.artist}"
+            else:
+                return await ctx.reply("I need the name of a song to look for lyrics!")
         new_song_name = song_name.replace(' ', '-')
         songs = await mimx.song_search(new_song_name)
         try:

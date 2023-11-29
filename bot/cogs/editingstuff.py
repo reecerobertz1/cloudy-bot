@@ -40,6 +40,9 @@ from utils.subclasses import Context
 class Editingstuff(commands.Cog, name="Editing", description="Includes the commands you would wanna use for editing!"):
     def __init__(self, bot):
         self.bot = bot
+
+    def rgb_to_hex(self, rgb):
+        return '#%02x%02x%02x' % rgb
     
     def gen_palette(self) -> BytesIO:
         with open("utils/palettes.json", "r") as f:
@@ -66,13 +69,18 @@ class Editingstuff(commands.Cog, name="Editing", description="Includes the comma
             image = BytesIO()
             temp_img.save(image, 'PNG')
             image.seek(0)
-        s = 100
+        font2 = ImageFont.truetype("Karla-Bold.ttf", 20)
+        s = 200
         ct = ColorThief(image)
         colors = ct.get_palette(4, 1)
-        img = Image.new('RGB', (s*len(colors), s))
+        img = Image.new('RGB', (s*len(colors), 225), (255, 255, 255))
         for i, color in enumerate(colors):
-            col = Image.new('RGB', (s, s), color)
+            hex_c = self.rgb_to_hex(color).upper()
+            col = Image.new('RGB', (s, s+25), color)
             img.paste(col, (i*s, 0))
+            drw = ImageDraw.Draw(img, 'RGBA')
+            drw.rectangle(((i*s, s), ((i+1)*s, s+25)), (0, 0, 0, 65))
+            drw.text(((i+0.5)*s, s), f"{hex_c.upper()}", color, font=font2, anchor="ma")
         buf = BytesIO()
         img.save(buf, 'PNG')
         buf.seek(0)
