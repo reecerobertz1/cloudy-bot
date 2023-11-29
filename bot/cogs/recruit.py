@@ -184,6 +184,7 @@ class Recruit(commands.Cog):
             embed = discord.Embed(title="App Information", description=f"{member}")
             embed.add_field(name="User ID", value=f"{result[0]}", inline=False)
             embed.add_field(name="Instagram", value=f"{result[1]}", inline=False)
+            embed.add_field(name="Apply Count", value=f"{result[4]}", inline=False)
             if result[2] == 1:
                 embed.add_field(name="Status", value="Accepted ✅", inline=False)
             else:
