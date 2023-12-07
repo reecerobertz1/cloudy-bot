@@ -88,7 +88,12 @@ class CloudyBot(commands.Bot):
             "cogs.error_handler",
             "cogs.recruit",
             "cogs.misc",
-            "cogs.slash"
+            "cogs.slash",
+            "cogs.imaging",
+            "cogs.games",
+            "cogs.tags",
+            "cogs.levels",
+            "cogs.starboard"
         }
 
     async def get_context(self, message, *, cls=None):

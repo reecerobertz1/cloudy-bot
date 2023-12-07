@@ -24,8 +24,11 @@ SOFTWARE.
 
 import discord
 from discord.ext import commands
-from typing import List, Optional
+from typing import List, Optional, Literal
 import random
+from setup.lists import categories, category_dict
+from utils.subclasses import CloudyBot, Context
+from utils.views import QuizStarter
 
 class InvitationButtons(discord.ui.View):
     def __init__(self, player_invited: discord.Member, timeout: Optional[float] = 180.0):
@@ -159,11 +162,11 @@ class TicTacToe(discord.ui.View):
         return None
 
 class Games(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: CloudyBot) -> None:
         self.bot = bot
 
     @commands.command(aliases=['ttt'])
-    async def tictactoe(self, ctx: commands.Context, player2: discord.Member):
+    async def tictactoe(self, ctx: Context, player2: discord.Member):
         """Play tic-tac-toe
         
         Parameters
@@ -192,6 +195,34 @@ class Games(commands.Cog):
             await invite.edit(embed=embed, view=view)
         else:
             return await invite.edit(content=f'❌ {player2.name} declined the invite', embed=None, view=None)
+
+    @commands.group(invoke_without_command=True)
+    async def quiz(self, ctx: Context, difficulty: Optional[Literal['easy', 'medium', 'hard']]='medium', question_count: Optional[int]=10, category: Optional[str]="general knowledge"):
+        """Test your knowledge with a quiz!
+        
+        Parameters
+        ----------
+        difficulty: {'easy', 'medium', 'hard'}, optional
+            the difficulty of the quiz, by default 'medium'
+        question_count: int, optional
+            the amount of questions the quiz will have, by default 10
+        category: str, optional
+            category for the quiz, by default 'general knowledge'
+        """
+        if category not in categories:
+            return await ctx.reply(f"`{category}` is not a valid category! try using the `quiz categories` command to see a list of valid categories!")
+        category_id = category_dict[f"{category}"]
+        question_count = 50 if question_count > 50 else question_count
+        embed = discord.Embed(title="Quiz", description="Join the quiz by pressing the `Join` button below!", color=0x3e5bab)
+        embed.add_field(name="1", value=f"**{ctx.author.display_name}**", inline=False)
+        message = await ctx.send(embed=embed)
+        await message.edit(view=QuizStarter([ctx.author.id], embed, ctx.author, difficulty, category_id, question_count, category, message, self.bot))
+
+    @quiz.command()
+    async def categories(self, ctx: Context):
+        """Shows the valid categories for the quiz command"""
+        embed = discord.Embed(title="Quiz categories", description=''.join([f"* {category}\n" for category in categories]), color=0x3e5bab)
+        await ctx.reply(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Games(bot))

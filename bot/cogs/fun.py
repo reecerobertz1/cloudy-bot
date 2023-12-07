@@ -437,6 +437,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
 
     @commands.command()
     async def lyrics(self, ctx: Context, *, song_name: Optional[str]):
+        """Gets song lyrics
+        
+        Parameters
+        -----------
+        song_name: str, optional
+            the name of the song to get the lyrics to
+        """
         mimx = LyricsFinder()
         if not song_name:
             spotify = discord.utils.find(lambda a: isinstance(a, discord.Spotify), ctx.author.activities)
@@ -457,6 +464,13 @@ class Fun(commands.Cog, name="Fun", description="Includes commands you can use f
                 await ctx.reply(embed=embed, view=SpotifyView("https://open.spotify.com/track/" + track.spotify_id))
         except:
             await ctx.reply(f"Looks like I couldn't find lyrics for **{song_name}**")
+
+    @commands.command(aliases=['affirmation'])
+    async def affirmate(self, ctx: Context):
+        """Sends affirmations"""
+        async with self.bot.session.get("https://www.affirmations.dev/") as api:
+            json = await api.json()
+            await ctx.reply(json['affirmation'])
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))
