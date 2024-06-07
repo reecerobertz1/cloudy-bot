@@ -40,7 +40,7 @@ class infoview(discord.ui.View):
 
     @discord.ui.button(label="Logos")
     async def klogos(self, interaction: discord.Interaction, button: discord.ui.Button):
-        logosembed = discord.Embed(title="<a:bun:1098764398962671677> CHroma Logos!", description="˃ Please make sure you watermark the logos!\n˃ Use the watermark on every edit\n˃ Do not share this link with anyone outside the group!", color=0x2b2d31)
+        logosembed = discord.Embed(title="<a:bun:1098764398962671677> Chroma Logos!", description="˃ Please make sure you watermark the logos!\n˃ Use the hashtag on every edit\n˃ Do not share this link with anyone outside the group!", color=0x2b2d31)
         logosembed.set_footer(text="Made us some logos? send them to Reece or Alisha!")
         logosembed.set_image(url=interaction.guild.banner)
         await interaction.user.send(f"key: `{logo_code}`\n{logos}", embed=logosembed)
